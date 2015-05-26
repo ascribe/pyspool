@@ -7,9 +7,22 @@ import pybitcointools
 
 class File(object):
 
-    """Docstring for File. """
+    """
+    File utility class.
+
+    Given a file name it calculates the hash of the file and the hash of the file + metadata
+    """
 
     def __init__(self, filename, testnet=False, **kwargs):
+        """
+
+        :param filename: Name of the file
+        :param testnet: testnet flag. Defaults to False
+        :param kwargs: Additional metadata to be encoded with the file.
+                       e.g. {'title': 'piece title', 'artist_name': 'artist'}
+        :return: File instance
+        """
+
         self.testnet = testnet
         # prefix of the addresses to distinguish between mainnet and testnet
         self._magicbyte = 111 if testnet else 0
@@ -17,10 +30,20 @@ class File(object):
 
     @classmethod
     def from_hash(cls, hash):
+        """
+
+        :param hash: hash of the file
+        :return: File instance
+        """
+
         cls.hash = hash
         return cls
 
     def _calculate_hash(self, filename, **kwargs):
+        """
+        Calculates the hash of the file and the hash of the file + metadata (passed on the keywargs)
+        """
+
         # hash to address
         with open(filename, 'rb') as f:
             file_hash = hashlib.md5(f.read()).hexdigest()
