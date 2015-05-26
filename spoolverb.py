@@ -1,16 +1,5 @@
-from collections import namedtuple
 from exceptions import Exception
 import re
-
-"""
-SPOOLVERB = namedtuple('SPOOLVERB', ['register', 'consign', 'transfer', 'loan', 'unconsign', 'fuel'])
-spoolverb = SPOOLVERB('REGISTER',
-                      'CONSIGN',
-                      'TRANSFER',
-                      'LOAN',
-                      'UNCONSIGN',
-                      'FUEL')
-"""
 
 
 class SpoolverbError(Exception):
@@ -30,8 +19,21 @@ class Spoolverb(object):
 
     supported_actions = ['REGISTER', 'CONSIGN', 'TRANSFER', 'LOAN', 'UNCONSIGN', 'FUEL', 'EDITIONS']
 
-    def __init__(self, num_editions=None, edition_num=None, loan_start='', loan_end='', meta='ASCRIBESPOOL', version='01', action=None):
-        # loan_start and loan_end are dates with format YYMMDD
+    def __init__(self, num_editions=None, edition_num=None, loan_start='',
+                 loan_end='', meta='ASCRIBESPOOL', version='01', action=None):
+        """
+        Initializer for the Spoolverb class
+
+        :param num_editions: number of editions to register
+        :param edition_num: number of the edition to use
+        :param loan_start: start of the loan in the format YYMMDD
+        :param loan_end: end of the loan in the format YYMMDD
+        :param meta: Header for the spool protocol. Defaults to 'ASCRIBESPOOL'
+        :param version: Version of the protocol. Defaults to '01'
+        :param action: one of the actions in supported_actions
+        :return: Spoolverb instace
+        """
+
         self.meta = meta
         self.version = version
         self.num_editions = num_editions
@@ -42,6 +44,12 @@ class Spoolverb(object):
 
     @classmethod
     def from_verb(cls, verb):
+        """
+        Construct a spoolverb instance from the string representation of the verb
+
+        :param verb: string representation of the verb e.g. ASCRIBESPOOL01LOAN12/150526150528
+        :return: Spoolverb instance
+        """
         pattern = r'^(?P<meta>[A-Z]+)(?P<version>\d+)(?P<action>[A-Z]+)(?P<arg1>\d+)(\/(?P<arg2>\d+))?$'
         match = re.match(pattern, verb)
         if not match:
@@ -53,12 +61,13 @@ class Spoolverb(object):
         action = data['action']
         if action == 'EDITIONS':
             num_editions = data['arg1']
-            return cls(meta=meta, version=version, action=action, num_editions=num_editions)
+            return cls(meta=meta, version=version, action=action, num_editions=int(num_editions))
         elif action == 'LOAN':
             edition_num = data['arg1']
             loan_start = data['arg2'][:6]
             loan_end = data['arg2'][6:]
-            return cls(meta=meta, version=version, action=action, edition_num=edition_num, loan_start=loan_start, loan_end=loan_end)
+            return cls(meta=meta, version=version, action=action, edition_num=int(edition_num),
+                       loan_start=loan_start, loan_end=loan_end)
         else:
             edition_num = data['arg1']
             return cls(meta=meta, version=version, action=action, edition_num=int(edition_num))
@@ -91,12 +100,3 @@ class Spoolverb(object):
     @property
     def fuel(self):
         return '{}{}FUEL'.format(self.meta, self.version)
-
-    @staticmethod
-    def get_action_from_verb(verb):
-        match = re.match( r'^[A-Z]+\d+([A-Z]+).*', verb)
-        if match:
-            return match.groups()[0]
-        else:
-            raise SpoolverbError('Invalid spoolverb: {}'.format(verb))
-
