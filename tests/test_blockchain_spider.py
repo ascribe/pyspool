@@ -41,6 +41,14 @@ class TestBlockchainSpider(unittest.TestCase):
         verb = BlockchainSpider.check_script(vouts)
         self.assertEqual(verb, 'ASCRIBESPOOL01EDITIONS10')
 
+    def test_strip_loan(self):
+        chain = BlockchainSpider.chain(self.tree, 1)
+        self.assertEqual(chain[-1]['action'], 'LOAN')
+
+        chain = BlockchainSpider.strip_loan(chain)
+        self.assertEqual(len(chain), 4)
+        self.assertEqual(chain[-1]['action'], 'UNCONSIGN')
+
     def test_data(self):
         tree = self.tree
         data = {0: tree[0]}

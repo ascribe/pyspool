@@ -1,7 +1,5 @@
 from exceptions import Exception
-from spoolex import SpoolExplorer, BlockchainSpider
-from transactions import Transactions
-from spoolverb import Spoolverb
+from spoolex import BlockchainSpider
 
 
 class OwnershipError(Exception):
@@ -16,25 +14,28 @@ class OwnershipError(Exception):
     def __str__(self):
         return repr(self.message)
 
-# TODO: Remove trailing loans from the chain before checking the ownership
 
 class Ownership(object):
     """
-    Ownership class
+    Checks the actions that an address can make on a piece
     """
 
     def __init__(self, address, piece_address, edition_number, testnet=False):
+        """
+
+        :param address: bitcoin address to check ownership over piece_address
+        :param piece_address: bitcoin address of the piece to check
+        :param edition_number: the edition number of the piece
+        :param testnet: testnet flag. Defaults to false
+        :return: returns an instance of the Ownserhip class
+        """
         self.address = address
         self.piece_address = piece_address
         self.edition_number = edition_number
         self.testnet = testnet
-        self._s = SpoolExplorer(testnet=testnet)
         self._bcs = BlockchainSpider(testnet=testnet)
         self._tree = self._bcs.history(piece_address)
         self.reason = ''
-
-    def refresh_history(self):
-        return self._s.history(self.piece_address)
 
     @property
     def can_transfer(self):
@@ -45,6 +46,7 @@ class Ownership(object):
             self.reason = 'The edition number {} does not exist in the blockchain'.format(self.edition_number)
             return False
 
+        chain = BlockchainSpider.strip_loan(chain)
         to_address = chain[-1]['to_address']
         if to_address != self.address:
             self.reason = 'You dont own the edition number {}'.format(self.edition_number)
@@ -68,6 +70,7 @@ class Ownership(object):
             self.reason = 'Master edition not yet registered'
             return False
 
+        chain = BlockchainSpider.strip_loan(chain)
         action = chain[-1]['action']
         piece_address = chain[-1]['piece_address']
         edition_number = chain[-1]['edition_number']
@@ -84,6 +87,7 @@ class Ownership(object):
         # 1. The master piece needs to be registered
         # 2. The number of editions needs to be registered
         # 3. The edition_number should not have been registered yet
+        # 4. The root address owns the piece
         chain = BlockchainSpider.chain(self._tree, 0)
 
         # edition 0 should only have two transactions: REGISTER and EDITIONS
@@ -91,6 +95,7 @@ class Ownership(object):
             self.reason = 'Master edition not yet registered'
             return False
 
+        chain = BlockchainSpider.strip_loan(chain)
         number_editions = chain[0]['number_editions']
         if number_editions == 0:
             self.reason = 'Number of editions not yet registered'
@@ -102,6 +107,11 @@ class Ownership(object):
 
         if self.edition_number in self._tree:
             self.reason = 'Edition number {} is already registerd in the blockchain'. format(self.edition_number)
+            return False
+
+        to_address = chain[0]['to_address']
+        if self.address != to_address:
+            self.reason = 'Address {} does not own the master edition of {}'.format(self.address, self.piece_address)
             return False
 
         return True
@@ -125,10 +135,6 @@ class Ownership(object):
         # 2. a piece with address piece_address needs to be registered with ASCRIBESPOOL01REGISTER0 (master edition)
         # 3. the number of editions should have not been set yet (no tx with verb ASCRIBESPOOLEDITIONS)
         chain = BlockchainSpider.chain(self._tree, 0)
-        print self._tree
-        print self.edition_number
-        print self.address
-        print self.piece_address
 
         if len(chain) == 0:
             self.reason = 'Master edition not yet registered'

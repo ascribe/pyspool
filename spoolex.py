@@ -101,6 +101,20 @@ class BlockchainSpider(object):
         return sorted(tree.get(edition_number, []), key=lambda d: d['timestamp_utc'])
 
     @staticmethod
+    def strip_loan(chain):
+        """
+        Returns the chain without loan. This way we can look at the last transaction
+        to establish ownership
+
+        :param chain: chain for a particular edition
+        :return: chain with loan transactions striped from the end of the chain
+        """
+        while chain[-1]['action'] == 'LOAN':
+            chain.pop()
+
+        return chain
+
+    @staticmethod
     def pprint(tree):
         """
         Utility function to pretty print the history tree of a piece
