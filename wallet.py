@@ -10,9 +10,14 @@ class Wallet(object):
     """Wallet"""
 
     def __init__(self, password, testnet=False):
-        """Create a BIP32 wallet.
+        """
+        Create a BIP32 wallet.
+
+        Addresses return by the wallet are of the form (path, address)
 
         :password: master secret for the wallet
+        :testnet: testnet flag. Defaults to false
+        :returns: instance of the Wallet
 
         """
         netcode = 'XTN' if testnet else 'BTC'

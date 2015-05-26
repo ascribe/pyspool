@@ -19,6 +19,7 @@ USER3 -> Unconsign edition number 1 back to USER2
 USER2 -> Loans edition number 1 to USER3
 """
 
+
 class TestOwnership(unittest.TestCase):
 
     def test_ownsership(self):
