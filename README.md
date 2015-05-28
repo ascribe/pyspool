@@ -9,7 +9,7 @@ pyspool is a reference implementation of the Secure Public Online Ownership Ledg
     - [Federation Wallet](#federation-wallet)
 - [Example](#example)
 - [Documentation](#documentation)
-    - [Spool](#Spool\(testnet=False\))
+    - [Spool](#spool)
     - [File](#file)
     - [Wallet](#wallet)
     - [Spoolverb](#spoolverb)
@@ -202,6 +202,8 @@ print txid
 
 ## Documentation
 
+#### Spool
+
 ##### Spool(testnet=False)
 Class that contains all Spool methods.
 
@@ -337,6 +339,8 @@ constructs the transaction.
 ##### _exception_ Spool.SpoolFundsError(message)
 Exception raised when there are not enough funds in a wallet to perform a transaction
 
+#### File
+
 ##### File(filename, testnet=False, **kwargs)
 Returns a instance of File given the file name.
 This class is used to calculate the hash of file and the hash of the file + metadata
@@ -358,6 +362,8 @@ Attribute with the hash of the file
 ##### _attribute_ File.file_hash_metadata
 Attribute with the hash of the file + metadata
 
+#### Wallet
+
 ##### Wallet(password, testnet=False)
 Create a Hierarchical Determistic (HD) wallet. Addresses return by the wallet are of the form (path, address)
 - **`password`**: master secret for the wallet
@@ -370,6 +376,8 @@ Create a Hierarchical Determistic (HD) wallet. Addresses return by the wallet ar
 
 ##### _attribute_ Wallet.root_address
 Attribute with the root address of the HD Wallet
+
+#### Spoolverb
 
 ##### Spoolverb(num_editions=None, edition_num=None, loan_start='',loan_end='', meta='ASCRIBESPOOL', version='01', action=None)
 Allows for easy creation of the verb to be encoded on the op_return of all SPOOL transactions
@@ -411,6 +419,8 @@ Construct a Spoolverb instance from the string representation of the verb
 ##### _exception_ SpoolverbError(message)
 Exception to be raised when a invalid or malformed spoolverb is encountered
 
+#### BlockchainSpider
+
 ##### BlockchainSpider(testnet=False)
 Spool blockain explorer. Retrieves from the blockchain the chain of ownership 
 of a hash created with the SPOOL protocol
@@ -448,6 +458,8 @@ Decodes the op_return hex representation into a string
 Looks into the vouts list of a transaction and returns the op_return if one exists
 - **`vouts`**: lists of outputs of a transaction
 - **`returns`**: string representation of the op_return
+
+#### Ownership
 
 ##### Ownsership(address, piece_address, edition_number, testnet=False)
 Checks the actions that an address can make on a piece.
