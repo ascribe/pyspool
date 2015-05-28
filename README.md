@@ -9,7 +9,7 @@ pyspool is a reference implementation of the Secure Public Online Ownership Ledg
     - [Federation Wallet](#federation-wallet)
 - [Example](#example)
 - [Documentation](#documentation)
-    - [Spool](#spool)
+    - [Spool](#Spool\(testnet=False\))
     - [File](#file)
     - [Wallet](#wallet)
     - [Spoolverb](#spoolverb)
