@@ -49,7 +49,7 @@ class Ownership(object):
         chain = BlockchainSpider.strip_loan(chain)
         to_address = chain[-1]['to_address']
         if to_address != self.address:
-            self.reason = 'You dont own the edition number {}'.format(self.edition_number)
+            self.reason = 'Address {} does not own the edition number {}'.format(self.address, self.edition_number)
             return False
 
         return True
@@ -87,7 +87,9 @@ class Ownership(object):
         # 1. The master piece needs to be registered
         # 2. The number of editions needs to be registered
         # 3. The edition_number should not have been registered yet
-        # 4. The root address owns the piece
+        # 4. TODO The root address owns the piece
+        #    right now we cannot do this because we only receive the leaf address
+        #    when registering an edition
         chain = BlockchainSpider.chain(self._tree, 0)
 
         # edition 0 should only have two transactions: REGISTER and EDITIONS
@@ -109,16 +111,10 @@ class Ownership(object):
             self.reason = 'Edition number {} is already registerd in the blockchain'. format(self.edition_number)
             return False
 
-        to_address = chain[0]['to_address']
-        if self.address != to_address:
-            self.reason = 'Address {} does not own the master edition of {}'.format(self.address, self.piece_address)
-            return False
-
         return True
 
     @property
     def can_register_master(self):
-        # TODO: Check if the user can register the master edition
         # To register a master edition:
         # 1. The piece addr cannot exist in the bitcoin network
 

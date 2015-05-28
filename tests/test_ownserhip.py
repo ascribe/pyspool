@@ -53,11 +53,6 @@ class TestOwnership(unittest.TestCase):
         self.assertTrue(ow.can_loan)
         self.assertTrue(ow.can_consign)
 
-        # USER2 cannot register any edition because he does not own the master piece
-        for i in range(2, 11):
-            ow = Ownership(USER2_LEAF, PIECE_HASH, edition_number=i, testnet=True)
-            self.assertFalse(ow.can_register)
-
         # USER2 loaned the piece to USER3 but USER3 cannot transfer, consign, loan
         # because he does not own the piece
         ow = Ownership(USER3_LEAF, PIECE_HASH, edition_number=1, testnet=True)

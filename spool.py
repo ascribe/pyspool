@@ -1,8 +1,6 @@
 """
 Main spool verb methods
 """
-import requests
-
 from exceptions import Exception
 
 from transactions import Transactions
@@ -10,8 +8,6 @@ from settings import *
 from utils import dispatch
 from spoolverb import Spoolverb
 
-
-requests.packages.urllib3.disable_warnings()
 
 class SpoolFundsError(Exception):
 
@@ -24,8 +20,6 @@ class SpoolFundsError(Exception):
 
     def __str__(self):
         return repr(self.message)
-
-
 
 
 class Spool(object):
@@ -62,11 +56,18 @@ class Spool(object):
 
     @dispatch
     def register(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
-        """TODO: Docstring for register.
-        To register a master edition use edition_num=0. Master edition is the edition number 0
+        """
+        Register an edition or master edition of a piece
 
-        :arg1: TODO
-        :returns: TODO
+        :param from_address: Federation address. All register transactions originate from the the Federation wallet
+        :param to_address: Address registering the edition
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Federation wallet password. For signing the transaction
+        :param edition_num: The number of the edition to register. User edition_num=0 to register the master edition
+        :param min_confirmations: Override the number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
         """
         file_hash, file_hash_metadata = hash
         path, from_address = from_address
@@ -82,11 +83,18 @@ class Spool(object):
 
     @dispatch
     def editions(self, from_address, to_address, hash, password, num_editions, min_confirmations=6, sync=False):
-        """TODO: Docstring for register.
-        To register a master edition use edition_num=0. Master edition is the edition number 0
+        """
+        Register the number of editions of a piece
 
-        :arg1: TODO
-        :returns: TODO
+        :param from_address: Federation address. All register transactions originate from the the Federation wallet
+        :param to_address: Address registering the number of editions
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password:  Federation wallet password. For signing the transaction
+        :param num_editions: Number of editions of the piece
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
         """
         file_hash, file_hash_metadata = hash
         path, from_address = from_address
@@ -102,20 +110,19 @@ class Spool(object):
 
     @dispatch
     def transfer(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
-        """TODO: Docstring for transfer.
-
-        :arg1: TODO
-        :returns: TODO
-
         """
-        # 0. check ownership
-        # an exception will be thrown if from_address does not own the piece with hash
-        # 1. refill
-        # TODO: Dependent transactions so that we wait for the refill to finish before doing the transfer
-        # refill_txid = self.refill(TEST_REFILL_ADDR, from_address, 1, 0, TEST_REFILL_PASS, min_confirmations=1)
-        # print 'refill_txid: {}'.format(refill_txid)
-        # time.sleep(60 * 5)
-        # 2. transfer
+        Transfer a piece between addresses
+
+        :param from_address: Address currently owning the edition
+        :param to_address: Address to receive the edition
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Password for the wallet currently owning the edition. For signing the transaction
+        :param edition_num: the number of the edition to transfer
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
+        """
         path, from_address = from_address
         file_hash, file_hash_metadata = hash
         verb = Spoolverb(edition_num=edition_num)
@@ -129,7 +136,19 @@ class Spool(object):
 
     @dispatch
     def consign(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
+        """
+        Consign a piece to an address
 
+        :param from_address: Address currently owning the edition
+        :param to_address: Address to where the piece will be consigned to
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Password for the wallet currently owning the edition. For signing the transaction
+        :param edition_num: the number of the edition to consign
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
+        """
         path, from_address = from_address
         file_hash, file_hash_metadata = hash
         verb = Spoolverb(edition_num=edition_num)
@@ -144,8 +163,19 @@ class Spool(object):
     @dispatch
     def unconsign(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
         """
-        In an unconsignment the to_address needs to be the address that created the consign transaction
+        Unconsign the edition
+
+        :param from_address: Address where the edition is currently consigned
+        :param to_address: Address that consigned the piece to from_address
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Password for the wallet currently holding the edition. For signing the transaction
+        :param edition_num: the number of the edition to unconsign
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
         """
+        # In an unconsignment the to_address needs to be the address that created the consign transaction
         path, from_address = from_address
         file_hash, file_hash_metadata = hash
         verb = Spoolverb(edition_num=edition_num)
@@ -159,15 +189,21 @@ class Spool(object):
 
     @dispatch
     def loan(self, from_address, to_address, hash, password, edition_num, loan_start, loan_end, min_confirmations=6, sync=False):
-        """TODO: Docstring for loan.
-
-        :start_date: start date of the loan with format YYMMDD
-        :end_date: end date of the loan with format YYMMDD
-
-        :returns: TODO
         """
-        # 0. check ownership
-        # an exception will be thrown if from_address does not own the piece with hash
+        Loan the edition
+
+        :param from_address: Address currently holding the edition
+        :param to_address: Address to loan the edition to
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Password for the wallet currently holding the edition. For signing the transaction
+        :param edition_num: the number of the edition to unconsign
+        :param loan_start: Start date for the loan. In the form YYMMDD
+        :param loan_end: End date for the loan. In the form YYMMDD
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
+        """
         path, from_address = from_address
         file_hash, file_hash_metadata = hash
         verb = Spoolverb(edition_num=edition_num, loan_start=loan_start, loan_end=loan_end)
@@ -181,12 +217,20 @@ class Spool(object):
 
     @dispatch
     def refill_main_wallet(self, from_address, to_address, nfees, ntokens, password, min_confirmations=6, sync=False):
-        """Used to refill main wallet. Here we don't want to use refill because we do not want a spoolverb and we
-        want to set the change.
+        """
+        Refill the Federation wallet with tokens and fees. This keeps the federation wallet clean.
+        Dealing with exact values simplifies the transactions. No need to calculate change. Easier to keep track of the
+        unspents and prevent double spends that would result in transactions being rejected by the bitcoin network.
 
-        :arg1: TODO
-        :returns: TODO
-
+        :param from_address: Refill wallet address. Refills the federation wallet with tokens and fees
+        :param to_address: Federation wallet address
+        :param nfees: Number of fees to transfer. Each fee is 10000 satoshi. Used to pay for the transactions
+        :param ntokens: Number of tokens to transfer. Each token is 600 satoshi. Used to register hashes in the blockchain
+        :param password: Password for the Refill wallet. Used to sign the transaction
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
         """
         path, from_address = from_address
         unsigned_tx = self._t.simple_transaction(from_address,
@@ -200,8 +244,18 @@ class Spool(object):
     @dispatch
     def refill(self, from_address, to_address, nfees, ntokens, password, min_confirmations=6, sync=False):
         """
-        with refill we do not send the change since we expect the main wallet to be sanitized, containing only
-        tokens and fees
+        Refill wallets with the necessary fuel to perform spool transactions
+
+        :param from_address: Federation wallet address. Fuels the wallets with tokens and fees. All transactions to wallets
+                holding a particular piece should come from the Federation wallet
+        :param to_address: Wallet address that needs to perform a spool transaction
+        :param nfees: Number of fees to transfer. Each fee is 10000 satoshi. Used to pay for the transactions
+        :param ntokens: Number of tokens to transfer. Each token is 600 satoshi. Used to register hashes in the blockchain
+        :param password: Password for the Federation wallet. Used to sign the transaction
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :return: transaction id
         """
         path, from_address = from_address
         verb = Spoolverb()
@@ -210,42 +264,29 @@ class Spool(object):
         outputs = [{'address': to_address, 'value': self._t._dust}] * ntokens
         outputs += [{'address': to_address, 'value': self._t._min_tx_fee}] * nfees
         outputs += [{'script': self._t._op_return_hex(verb.fuel), 'value': 0}]
-        print inputs,
-        print outputs
         unsigned_tx = self._t.build_transaction(inputs, outputs)
         signed_tx = self._t.sign_transaction(unsigned_tx, password, path=path)
         txid = self._t.push(signed_tx)
         return txid
 
-    def delete(self, arg1):
-        """TODO: Docstring for delete.
-
-        :arg1: TODO
-        :returns: TODO
-
-        """
-        raise NotImplementedError
-
-    def custom(self, arg1):
-        """Method for custom verbs
-
-        :arg1: TODO
-        :returns: TODO
-
-        """
-        raise NotImplementedError
-
     def simple_spool_transaction(self, from_address, to, op_return, min_confirmations=6):
+        """
+        Utililty function to create the spool transactions. Selects the inputs, encodes the op_return and
+        constructs the transaction.
+
+        :param from_address: Address originating the the transaction
+        :param to: list of addresses to receive tokens (file_hash, file_hash_metadata, ...)
+        :param op_return: String representation of the spoolverb, as returned by the properties of Spoolverb
+        :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :return: unsigned transaction
+        """
         # list of addresses to send
         ntokens = len(to)
         nfees = self._t.estimate_fee(ntokens, 2) / 10000
-        print 'nfees: {}'.format(nfees)
         inputs = self._select_inputs(from_address, nfees, ntokens, min_confirmations=min_confirmations)
         # outputs
         outputs = [{'address': to_address, 'value': self._t._dust} for to_address in to]
         outputs += [{'script': self._t._op_return_hex(op_return), 'value': 0}]
-        print inputs
-        print outputs
         # build transaction
         unsigned_tx = self._t.build_transaction(inputs, outputs)
         return unsigned_tx

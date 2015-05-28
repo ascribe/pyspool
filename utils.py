@@ -11,7 +11,7 @@ from spoolex import BlockchainSpider
 # number of seconds between transaction confirmed checks.
 # only needed for when calling a method with sync=True
 TIMEOUT = 10
-MAX_TIMEOUT = 40   # max timeout in which the exponential backoff with stop
+MAX_TIMEOUT = 40   # max timeout in which the exponential backoff will stop
 
 
 def dispatch(f):
@@ -59,13 +59,11 @@ def dispatch(f):
         # do a synchronous transaction
         if sync:
             txid = f(*args, **kwargs)
-            print 'Doing sync {}'.format(txid)
             # lets give it some time for the transaction to reach the network
             t = Transactions(testnet=testnet)
             confirmations = 0
             timeout = TIMEOUT
             while not confirmations:
-                print timeout
                 # lets do a simple exponential backoff. Transactions may take some time to be picked up by some
                 # services
                 try:
