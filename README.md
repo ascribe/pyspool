@@ -14,7 +14,7 @@ pyspool is a reference implementation of the Secure Public Online Ownership Ledg
     - [Wallet](#wallet)
     - [Spoolverb](#spoolverb)
     - [BlockchainSpider](#blockchainspider)
-    - [Ownsership](#ownsership)
+    - [Ownsership](#ownership)
 - [Testing](#testing)
 - [Contributing](#contributing)
 
