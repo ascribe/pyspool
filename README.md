@@ -205,118 +205,118 @@ Class that contains all Spool methods.
         - file_hash: is the hash of the digital file
         - file_hash_metadata: is the hash of the digital file + metadata
     The hash is passed to the methods has a tuple (file_hash, file_hash_metadata)
-- testnet: Whether to use the bitcoin testnet or mainnet. Defaults to False
-- returns: Spool instance
+- **`testnet`**: Whether to use the bitcoin testnet or mainnet. Defaults to False
+- **`returns`**: Spool instance
 
 ##### Spool.register(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
 Register an edition or master edition of a piece
-- from_address: Federation address. All register transactions originate from the the Federation wallet
-- to_address: Address registering the edition
-- hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
-- password: Federation wallet password. For signing the transaction
-- edition_num: The number of the edition to register. User edition_num=0 to register the master edition
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Federation address. All register transactions originate from the the Federation wallet
+- **`to_address`**: Address registering the edition
+- **`hash`**: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+- **`password`**: Federation wallet password. For signing the transaction
+- **`edition_num`**: The number of the edition to register. User edition_num=0 to register the master edition
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.editions(from_address, to_address, hash, password, num_editions, min_confirmations=6, sync=False)
 Register the number of editions of a piece
-- from_address: Federation address. All register transactions originate from the the Federation wallet
-- to_address: Address registering the number of editions
-- hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
-- password: Federation wallet password. For signing the transaction
-- num_editions: Number of editions of the piece
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Federation address. All register transactions originate from the the Federation wallet
+- **`to_address`**: Address registering the number of editions
+- **`hash`**: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+- **`password`**: Federation wallet password. For signing the transaction
+- **`num_editions`**: Number of editions of the piece
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.transfer(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
 Transfer a piece between addresses
-- from_address: Address currently owning the edition
-- to_address: Address to receive the edition
-- hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
-- password: Password for the wallet currently owning the edition. For signing the transaction
-- edition_num: the number of the edition to transfer
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Address currently owning the edition
+- **`to_address`**: Address to receive the edition
+- **`hash`**: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+- **`password`**: Password for the wallet currently owning the edition. For signing the transaction
+- **`edition_num`**: the number of the edition to transfer
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.consign(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
 Consign a piece to an address
-- from_address: Address currently owning the edition
-- to_address: Address to where the piece will be consigned to
-- hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
-- password: Password for the wallet currently owning the edition. For signing the transaction
-- edition_num: the number of the edition to consign
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Address currently owning the edition
+- **`to_address`**: Address to where the piece will be consigned to
+- **`hash`**: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+- **`password`**: Password for the wallet currently owning the edition. For signing the transaction
+- **`edition_num`**: the number of the edition to consign
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.unconsign(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
 Unconsign the edition
-- from_address: Address where the edition is currently consigned
-- to_address: Address that consigned the piece to _from_address_
-- hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
-- password: Password for the wallet currently holding the edition. For signing the transaction
-- edition_num: the number of the edition to unconsign
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Address where the edition is currently consigned
+- **`to_address`**: Address that consigned the piece to _from_address_
+- **`hash`**: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+- **`password`**: Password for the wallet currently holding the edition. For signing the transaction
+- **`edition_num`**: the number of the edition to unconsign
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.loan(from_address, to_address, hash, password, edition_num, loan_start, loan_end, min_confirmations=6, sync=False)
 Loan the edition
-- from_address: Address currently holding the edition
-- to_address: Address to loan the edition to
-- hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
-- password: Password for the wallet currently holding the edition. For signing the transaction
-- edition_num: the number of the edition to unconsign
-- loan_start: Start date for the loan. In the form `YYMMDD`
-- loan_end: End date for the loan. In the form `YYMMDD`
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Address currently holding the edition
+- **`to_address`**: Address to loan the edition to
+- **`hash`**: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+- **`password`**: Password for the wallet currently holding the edition. For signing the transaction
+- **`edition_num`**: the number of the edition to unconsign
+- **`loan_start`**: Start date for the loan. In the form `YYMMDD`
+- **`loan_end`**: End date for the loan. In the form `YYMMDD`
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.refill_main_wallet(from_address, to_address, nfees, ntokens, password, min_confirmations=6, sync=False)
 Refill the Federation wallet with tokens and fees. This keeps the federation wallet clean.
 Dealing with exact values simplifies the transactions. No need to calculate change. Easier to keep track of the
 unspents and prevent double spends that would result in transactions being rejected by the bitcoin network.
-- from_address: Refill wallet address. Refills the federation wallet with tokens and fees
-- to_address: Federation wallet address
-- nfees: Number of fees to transfer. Each fee is 10000 satoshi. Used to pay for the transactions
-- ntokens: Number of tokens to transfer. Each token is 600 satoshi. Used to register hashes in the blockchain
-- password: Password for the Refill wallet. Used to sign the transaction
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`from_address`**: Refill wallet address. Refills the federation wallet with tokens and fees
+- **`to_address`**: Federation wallet address
+- **`nfees`**: Number of fees to transfer. Each fee is 10000 satoshi. Used to pay for the transactions
+- **`ntokens`**: Number of tokens to transfer. Each token is 600 satoshi. Used to register hashes in the blockchain
+- **`password`**: Password for the Refill wallet. Used to sign the transaction
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.refill(from_address, to_address, nfees, ntokens, edition_num, min_confirmations=6, sync=False)
 Refill wallets with the necessary fuel to perform spool transactions
-- from_address: Federation wallet address. Fuels the wallets with tokens and fees. All transactions to wallets
+- **`from_address`**: Federation wallet address. Fuels the wallets with tokens and fees. All transactions to wallets
                 holding a particular piece should come from the Federation wallet
-- to_address: Wallet address that needs to perform a spool transaction
-- nfees: Number of fees to transfer. Each fee is 10000 satoshi. Used to pay for the transactions
-- ntokens: Number of tokens to transfer. Each token is 600 satoshi. Used to register hashes in the blockchain
-- password: Password for the Federation wallet. Used to sign the transaction
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+- **`to_address`**: Wallet address that needs to perform a spool transaction
+- **`nfees`**: Number of fees to transfer. Each fee is 10000 satoshi. Used to pay for the transactions
+- **`ntokens`**: Number of tokens to transfer. Each token is 600 satoshi. Used to register hashes in the blockchain
+- **`password`**: Password for the Federation wallet. Used to sign the transaction
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
-- returns: transaction id
+- **`returns`**: transaction id
 
 ##### Spool.simple_spool_transaction(from_address, to, op_return, min_confirmations=6)
 Utililty function to create the spool transactions. Selects the inputs, encodes the op_return and
 constructs the transaction.
-- from_address: Address originating the the transaction
-- to: list of addresses to receive tokens (file_hash, file_hash_metadata, ...)
-- op_return: String representation of the spoolverb, as returned by the properties of Spoolverb
-- min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
-- returns: unsigned transaction
+- **`from_address`**: Address originating the the transaction
+- **`to`**: list of addresses to receive tokens (file_hash, file_hash_metadata, ...)
+- **`op_return`**: String representation of the spoolverb, as returned by the properties of Spoolverb
+- **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
+- **`returns`**: unsigned transaction
 
 ##### _exception_ Spool.SpoolFundsError(message)
 Exception raised when there are not enough funds in a wallet to perform a transaction
@@ -325,16 +325,16 @@ Exception raised when there are not enough funds in a wallet to perform a transa
 Returns a instance of File given the file name.
 This class is used to calculate the hash of file and the hash of the file + metadata
 to be included on the blockchain
-- filename: Name of the file
-- testnet: Whether to use the bitcoin testnet or mainnet. Defaults to False
-- kwargs: Additional optional metadata to be encoded with the file.
+- **`filename`**: Name of the file
+- **`testnet`**: Whether to use the bitcoin testnet or mainnet. Defaults to False
+- **`kwargs`**: Additional optional metadata to be encoded with the file.
           e.g. `{'title': 'piece title', 'artist_name': 'artist'}`
-- returns: File instance
+- **`returns`**: File instance
 
 ##### File.from_hash(hash)
 Returns an instance of File given the hash of the file.
-- hash: hash of the file
-- returns: File instance
+- **`hash`**: hash of the file
+- **`returns`**: File instance
 
 ##### _attribute_ File.file_hash
 Attribute with the hash of the file
@@ -344,53 +344,53 @@ Attribute with the hash of the file + metadata
 
 ##### Wallet(password, testnet=False)
 Create a Hierarchical Determistic (HD) wallet. Addresses return by the wallet are of the form (path, address)
-- password: master secret for the wallet
-- testnet: Whether to use the bitcoin testnet or mainnet. Defaults to False
-- returns: Wallet instance
+- **`password`**: master secret for the wallet
+- **`testnet`**: Whether to use the bitcoin testnet or mainnet. Defaults to False
+- **`returns`**: Wallet instance
 
 ##### Wallet.address_from_path(path=None)
-- path: path for the HD wallet. If path is None it will generate a unique path based on time
-- returns: a tuple with the path and leaf address
+- **`path`**: path for the HD wallet. If path is None it will generate a unique path based on time
+- **`returns`**: a tuple with the path and leaf address
 
 ##### _attribute_ Wallet.root_address
 Attribute with the root address of the HD Wallet
 
 ##### Spoolverb(num_editions=None, edition_num=None, loan_start='',loan_end='', meta='ASCRIBESPOOL', version='01', action=None)
 Allows for easy creation of the verb to be encoded on the op_return of all SPOOL transactions
-- num_editions: number of editions to register
-- edition_num: number of the edition to use
-- loan_start: start of the loan in the format YYMMDD
-- loan_end: end of the loan in the format YYMMDD
-- meta: Header for the spool protocol. Defaults to 'ASCRIBESPOOL'
-- version: Version of the protocol. Defaults to '01'
-- action: one of the actions in supported_actions
-- returns: an instance of Spoolverb
+- **`num_editions`**: number of editions to register
+- **`edition_num`**: number of the edition to use
+- **`loan_start`**: start of the loan in the format YYMMDD
+- **`loan_end`**: end of the loan in the format YYMMDD
+- **`meta`**: Header for the spool protocol. Defaults to 'ASCRIBESPOOL'
+- **`version`**: Version of the protocol. Defaults to '01'
+- **`action`**: one of the actions in supported_actions
+- **`returns`**: an instance of Spoolverb
 
 ##### Spoolverb.from_verb(verb)
 Construct a Spoolverb instance from the string representation of the verb
-- verb: string representation of the verb e.g. `ASCRIBESPOOL01LOAN12/150526150528`
-- returns: Spoolverb instance
+- **`verb`**: string representation of the verb e.g. `ASCRIBESPOOL01LOAN12/150526150528`
+- **`returns`**: Spoolverb instance
 
 ##### _property_ Spoolverb.register
-- returns: string representation of the _REGISTER_ spoolverb e.g. `ASCRIBESPOOL01REGISTER1`
+- **`returns`**: string representation of the _REGISTER_ spoolverb e.g. `ASCRIBESPOOL01REGISTER1`
 
 ##### _property_ Spoolverb.editions
-- returns: string representation of the _EDITIONS_ spoolverb e.g. `ASCRIBESPOOL01EDITIONS10`
+- **`returns`**: string representation of the _EDITIONS_ spoolverb e.g. `ASCRIBESPOOL01EDITIONS10`
 
 ##### _property_ Spoolverb.transfer
-- returns: string representation of the _TRANSFER_ spoolverb e.g. `ASCRIBESPOOL01TRANSFER1`
+- **`returns`**: string representation of the _TRANSFER_ spoolverb e.g. `ASCRIBESPOOL01TRANSFER1`
 
 ##### _property_ Spoolverb.consign
-- returns: string representation of the _CONSIGN_ spoolverb e.g. `ASCRIBESPOOL01CONSIGN1`
+- **`returns`**: string representation of the _CONSIGN_ spoolverb e.g. `ASCRIBESPOOL01CONSIGN1`
 
 ##### _property_ Spoolverb.unconsign
-- returns: string representation of the _UNCONSIGN_ spoolverb e.g. `ASCRIBESPOOL01UNCOSIGN1`
+- **`returns`**: string representation of the _UNCONSIGN_ spoolverb e.g. `ASCRIBESPOOL01UNCOSIGN1`
 
 ##### _property_ Spoolverb.loan
-- returns: string representation of the _LOAN_ spoolverb e.g. `ASCRIBESPOOL01LOAN1/150526150528`
+- **`returns`**: string representation of the _LOAN_ spoolverb e.g. `ASCRIBESPOOL01LOAN1/150526150528`
 
 ##### _property_ Spoolverb.fuel
-- returns: string representation og the _FUEL_ spoolverb e.g. `ASCRIBESPOOL01FUEL`
+- **`returns`**: string representation og the _FUEL_ spoolverb e.g. `ASCRIBESPOOL01FUEL`
 
 ##### _exception_ SpoolverbError(message)
 Exception to be raised when a invalid or malformed spoolverb is encountered
@@ -398,69 +398,69 @@ Exception to be raised when a invalid or malformed spoolverb is encountered
 ##### BlockchainSpider(testnet=False)
 Spool blockain explorer. Retrieves from the blockchain the chain of ownership 
 of a hash created with the SPOOL protocol
-- testnet: Whether to use the bitcoin testnet or mainnet. Defaults to False
-- returns: BlockainSpider instance
+- **`testnet`**: Whether to use the bitcoin testnet or mainnet. Defaults to False
+- **`returns`**: BlockainSpider instance
 
 ##### BlockchainSpider.history(hash)
 Retrieve the ownership tree of all editions of a piece given the hash
-- hash: Hash of the file to check. Can be created with the File class
-- returns: ownsership tree of all editions of a piece
+- **`hash`**: Hash of the file to check. Can be created with the File class
+- **`returns`**: ownsership tree of all editions of a piece
 
 ##### BlockchainSpider.chain(ownership_tree, edition_number)
-- ownership_tree: ownsership tree of all editions of a piece
-- edition_number: The edition number to check for
-- returns: The chain of ownsership of a particular edition of the piece ordered by timestamp
+- **`ownership_tree`**: ownsership tree of all editions of a piece
+- **`edition_number`**: The edition number to check for
+- **`returns`**: The chain of ownsership of a particular edition of the piece ordered by timestamp
            on the blockchain
 
 ##### BlockchainSpider.strip_loan(chain)
 Returns the chain without loan. This way we can look at the last transaction 
 to establish ownership
-- chain: chain for a particular edition
-- returns: chain with loan transactions striped from the end of the chain
+- **`chain`**: chain for a particular edition
+- **`returns`**: chain with loan transactions striped from the end of the chain
 
 ##### BlockchainSpider.pprint(ownership_tree)
 Utility function to pretty print the ownership tree of a piece
-- ownsership_tree: Ownership tree of a piece
-- returns: None
+- **`ownsership_tree`**: Ownership tree of a piece
+- **`returns`**: None
 
 ##### BlockchainSpider.decode_op_return(op_return_hex)
 Decodes the op_return hex representation into a string
-- op_return_hex: hex representation of the op_return
-- returns: string representation of the op_return
+- **`op_return_hex`**: hex representation of the op_return
+- **`returns`**: string representation of the op_return
 
 ##### BlockchainSpider.check_script(vouts)
 Looks into the vouts list of a transaction and returns the op_return if one exists
-- vouts: lists of outputs of a transaction
-- returns: string representation of the op_return
+- **`vouts`**: lists of outputs of a transaction
+- **`returns`**: string representation of the op_return
 
 ##### Ownsership(address, piece_address, edition_number, testnet=False)
 Checks the actions that an address can make on a piece.
-- address: bitcoin address to check ownership over piece_address
-- piece_address: bitcoin address of the piece to check
-- edition_number: the edition number of the piece
-- testnet: testnet flag. Defaults to false
-- returns: returns an instance of the Ownserhip class
+- **`address`**: bitcoin address to check ownership over piece_address
+- **`piece_address`**: bitcoin address of the piece to check
+- **`edition_number`**: the edition number of the piece
+- **`testnet`**: testnet flag. Defaults to false
+- **`returns`**: returns an instance of the Ownserhip class
 
 ##### _property_ Ownsership.can_register_master
-- returns: True if _address_ can register the master edition of _piece_address_ else False
+- **`returns`**: True if _address_ can register the master edition of _piece_address_ else False
 
 ##### _property_ Ownsership.can_editions
-- returns: True if _address_ can register the number of editions of _piece_address_ else False
+- **`returns`**: True if _address_ can register the number of editions of _piece_address_ else False
 
 ##### _property_ Ownsership.can_register
-- returns: True if _address_ can register the edition _edition_number_ of _piece_address_ else False
+- **`returns`**: True if _address_ can register the edition _edition_number_ of _piece_address_ else False
 
 ##### _property_ Ownsership.can_transfer
-- returns: True if _address_ can transfer the edition _edition_number_ of _piece_address_ else False
+- **`returns`**: True if _address_ can transfer the edition _edition_number_ of _piece_address_ else False
 
 ##### _property_ Ownsership.can_consign
-- returns: True if _address_ can consign the edition _edition_number_ of _piece_address_ else False
+- **`returns`**: True if _address_ can consign the edition _edition_number_ of _piece_address_ else False
 
 ##### _property_ Ownsership.can_unconsign
-- returns: True if _address_ can unconsign the edition _edition_number_ of _piece_address_ else False
+- **`returns`**: True if _address_ can unconsign the edition _edition_number_ of _piece_address_ else False
 
 ##### _property_ Ownsership.can_loan
-- returns: True if _address_ can loan the edition _edition_number_ of _piece_address_ else False
+- **`returns`**: True if _address_ can loan the edition _edition_number_ of _piece_address_ else False
 
 ##### _attribute_ Ownserhip.reason
 Attribute set with a reason message when one the above properties returns `False`
