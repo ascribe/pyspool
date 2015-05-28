@@ -4,11 +4,11 @@ import random
 import requests
 
 from string import ascii_letters
-from wallet import Wallet
-from file import File
+from spool import Wallet
+from spool import File
 from spool import Spool
 from transactions import Transactions
-from spoolex import BlockchainSpider
+from spool import BlockchainSpider
 
 requests.packages.urllib3.disable_warnings()
 

@@ -1,0 +1,4 @@
+pybitcointools==1.1.15
+-e git+https://github.com/richardkiss/pycoin@80aeee52e58fed72b136cbf1aec1bbbb8d1e01a8#egg=pycoin-master
+requests==2.7.0
+-e git://github.com/ascribe/transactions.git@5060263d20fd533c5ecc62bde1b18af1384eee5d#egg=transactions-master

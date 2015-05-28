@@ -1,6 +1,6 @@
 import unittest
 
-from spoolex import BlockchainSpider
+from spool import BlockchainSpider
 from transactions import Transactions
 
 PIECE_HASH = 'myr2VcDnPKf997sjXx6rUFc4CtFH9sxNVS'

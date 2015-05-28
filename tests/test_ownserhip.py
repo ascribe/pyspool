@@ -1,5 +1,5 @@
 import unittest
-from ownership import Ownership
+from spool import Ownership
 
 USER1_ROOT = 'n2sQHoUghWUgSM8msqdmCim8pZ635YjoCD'
 USER1_LEAF = 'mmiFcUFjtVHuDFLdKKV9uydmiR9Qb34pfG'

@@ -1,6 +1,6 @@
 import unittest
 
-from file import File
+from spool import File
 
 FILENAME = 'tests/ascribe.png'
 FILE_HASH_TESTNET = 'mv5yDkR5dnjGHxietq7CH78WHk8vzsu4vH'

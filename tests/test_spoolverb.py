@@ -1,6 +1,6 @@
 import unittest
 
-from spoolverb import Spoolverb
+from spool import Spoolverb
 
 
 class TestSpoolverb(unittest.TestCase):

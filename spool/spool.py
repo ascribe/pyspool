@@ -4,7 +4,6 @@ Main spool verb methods
 from exceptions import Exception
 
 from transactions import Transactions
-from settings import *
 from utils import dispatch
 from spoolverb import Spoolverb
 

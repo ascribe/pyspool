@@ -1,5 +1,5 @@
 import unittest
-from wallet import Wallet
+from spool import Wallet
 from datetime import datetime
 
 MASTER_PASSWORD = 'MaStErPaSsWoRd'
