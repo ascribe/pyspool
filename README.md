@@ -2,6 +2,22 @@
 pyspool is a reference implementation of the Secure Public Online Ownership Ledger 
 [SPOOL](https://github.com/ascribe/spool) and part of the development stack of [ascribe.io](https://www.ascribe.io/)
 
+## Table of contents
+- [Install](#install)
+- [Overview](#overview)
+    - [Refill Wallet](#refill-wallet)
+    - [Federation Wallet](#federation-wallet)
+- [Example](#example)
+- [Documentation](#documentation)
+    - [Spool](#spool)
+    - [File](#file)
+    - [Wallet](#wallet)
+    - [Spoolverb](#spoolverb)
+    - [BlockchainSpider](#blockchainspider)
+    - [Ownsership](#ownsership)
+- [Testing](#testing)
+- [Contributing](#contributing)
+
 ## Install
 ```
 pip install -r requirements.txt
