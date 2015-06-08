@@ -226,7 +226,7 @@ Class that contains all Spool methods.
 - **`testnet`**: Whether to use the bitcoin testnet or mainnet. Defaults to False
 - **`returns`**: Spool instance
 
-##### Spool.register(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
+##### Spool.register(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True)
 Register an edition or master edition of a piece
 - **`from_address`**: Federation address. All register transactions originate from the the Federation wallet
 - **`to_address`**: Address registering the edition
@@ -236,9 +236,10 @@ Register an edition or master edition of a piece
 - **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
 - **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+- **`ownership`**: Check ownsership in the blockchain before pushing the transaction. Defaults to True
 - **`returns`**: transaction id
 
-##### Spool.editions(from_address, to_address, hash, password, num_editions, min_confirmations=6, sync=False)
+##### Spool.editions(from_address, to_address, hash, password, num_editions, min_confirmations=6, sync=False, ownership=True)
 Register the number of editions of a piece
 - **`from_address`**: Federation address. All register transactions originate from the the Federation wallet
 - **`to_address`**: Address registering the number of editions
@@ -248,9 +249,10 @@ Register the number of editions of a piece
 - **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
 - **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+- **`ownership`**: Check ownsership in the blockchain before pushing the transaction. Defaults to True        
 - **`returns`**: transaction id
 
-##### Spool.transfer(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
+##### Spool.transfer(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True)
 Transfer a piece between addresses
 - **`from_address`**: Address currently owning the edition
 - **`to_address`**: Address to receive the edition
@@ -260,9 +262,10 @@ Transfer a piece between addresses
 - **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
 - **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+- **`ownership`**: Check ownsership in the blockchain before pushing the transaction. Defaults to True        
 - **`returns`**: transaction id
 
-##### Spool.consign(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
+##### Spool.consign(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True)
 Consign a piece to an address
 - **`from_address`**: Address currently owning the edition
 - **`to_address`**: Address to where the piece will be consigned to
@@ -272,9 +275,10 @@ Consign a piece to an address
 - **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
 - **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+- **`ownership`**: Check ownsership in the blockchain before pushing the transaction. Defaults to True        
 - **`returns`**: transaction id
 
-##### Spool.unconsign(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False)
+##### Spool.unconsign(from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True)
 Unconsign the edition
 - **`from_address`**: Address where the edition is currently consigned
 - **`to_address`**: Address that consigned the piece to _from_address_
@@ -284,9 +288,10 @@ Unconsign the edition
 - **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
 - **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+- **`ownership`**: Check ownsership in the blockchain before pushing the transaction. Defaults to True        
 - **`returns`**: transaction id
 
-##### Spool.loan(from_address, to_address, hash, password, edition_num, loan_start, loan_end, min_confirmations=6, sync=False)
+##### Spool.loan(from_address, to_address, hash, password, edition_num, loan_start, loan_end, min_confirmations=6, sync=False, ownership=True)
 Loan the edition
 - **`from_address`**: Address currently holding the edition
 - **`to_address`**: Address to loan the edition to
@@ -298,6 +303,7 @@ Loan the edition
 - **`min_confirmations`**: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
 - **`sync`**: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+- **`ownership`**: Check ownsership in the blockchain before pushing the transaction. Defaults to True        
 - **`returns`**: transaction id
 
 ##### Spool.refill_main_wallet(from_address, to_address, nfees, ntokens, password, min_confirmations=6, sync=False)

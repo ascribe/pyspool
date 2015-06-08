@@ -54,7 +54,7 @@ class Spool(object):
         self._t = Transactions(testnet=testnet)
 
     @dispatch
-    def register(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
+    def register(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
         """
         Register an edition or master edition of a piece
 
@@ -66,6 +66,7 @@ class Spool(object):
         :param min_confirmations: Override the number of confirmations when chosing the inputs of the transaction. Defaults to 6
         :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
         :return: transaction id
         """
         file_hash, file_hash_metadata = hash
@@ -81,7 +82,7 @@ class Spool(object):
         return txid
 
     @dispatch
-    def editions(self, from_address, to_address, hash, password, num_editions, min_confirmations=6, sync=False):
+    def editions(self, from_address, to_address, hash, password, num_editions, min_confirmations=6, sync=False, ownership=True):
         """
         Register the number of editions of a piece
 
@@ -93,6 +94,7 @@ class Spool(object):
         :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
         :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
         :return: transaction id
         """
         file_hash, file_hash_metadata = hash
@@ -108,7 +110,7 @@ class Spool(object):
         return txid
 
     @dispatch
-    def transfer(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
+    def transfer(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
         """
         Transfer a piece between addresses
 
@@ -120,6 +122,7 @@ class Spool(object):
         :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
         :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
         :return: transaction id
         """
         path, from_address = from_address
@@ -134,7 +137,7 @@ class Spool(object):
         return txid
 
     @dispatch
-    def consign(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
+    def consign(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
         """
         Consign a piece to an address
 
@@ -146,6 +149,7 @@ class Spool(object):
         :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
         :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
         :return: transaction id
         """
         path, from_address = from_address
@@ -160,7 +164,7 @@ class Spool(object):
         return txid
 
     @dispatch
-    def unconsign(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False):
+    def unconsign(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
         """
         Unconsign the edition
 
@@ -172,6 +176,7 @@ class Spool(object):
         :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
         :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
         :return: transaction id
         """
         # In an unconsignment the to_address needs to be the address that created the consign transaction
@@ -187,7 +192,7 @@ class Spool(object):
         return txid
 
     @dispatch
-    def loan(self, from_address, to_address, hash, password, edition_num, loan_start, loan_end, min_confirmations=6, sync=False):
+    def loan(self, from_address, to_address, hash, password, edition_num, loan_start, loan_end, min_confirmations=6, sync=False, ownership=True):
         """
         Loan the edition
 
@@ -201,6 +206,7 @@ class Spool(object):
         :param min_confirmations: Number of confirmations when chosing the inputs of the transaction. Defaults to 6
         :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
         least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
         :return: transaction id
         """
         path, from_address = from_address
