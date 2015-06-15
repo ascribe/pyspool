@@ -20,7 +20,7 @@ class Ownership(object):
     Checks the actions that an address can make on a piece
     """
 
-    def __init__(self, address, piece_address, edition_number, testnet=False):
+    def __init__(self, address, piece_address, edition_number, testnet=False, service='blockr', username='', password='', host='', port=''):
         """
 
         :param address: bitcoin address to check ownership over piece_address
@@ -33,7 +33,8 @@ class Ownership(object):
         self.piece_address = piece_address
         self.edition_number = edition_number
         self.testnet = testnet
-        self._bcs = BlockchainSpider(testnet=testnet)
+        self._bcs = BlockchainSpider(service=service, testnet=testnet, username=username,
+                                     password=password, host=host, port=port)
         self._tree = self._bcs.history(piece_address)
         self.reason = ''
 

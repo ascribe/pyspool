@@ -30,14 +30,29 @@ class TestSpool(unittest.TestCase):
 
     def setUp(self):
         try:
-            #flag to run the tests
+            # flag to run the tests
             test = os.environ['TEST_SPOOL']
+            if test == '2':
+                username = os.environ['TESTNET_USERNAME']
+                password = os.environ['TESTNET_PASSWORD']
+                host = os.environ['TESTNET_HOST']
+                port = os.environ['TESTNET_PORT']
             self.refill_pass = os.environ['TEST_REFILL_PASS']
             self.federation_pass = os.environ['TEST_FEDERATION_PASS']
             self.refill_root = Wallet(self.refill_pass, testnet=True).root_address
             self.federation_root = Wallet(self.federation_pass, testnet=True).root_address
         except KeyError:
             raise unittest.SkipTest('TEST_REFILL_PASS and/or TEST_FEDERATION_PASS environment variables are not set.')
+
+        # set TEST_SPOOL=2 to test with bitcoind
+        if test == '2':
+            print 'using bitcoind'
+            self.t = Transactions(testnet=True, service='daemon', username=username, password=password, host=host, port=port)
+            self.spool = Spool(testnet=True, service='daemon', username=username, password=password, host=host, port=port)
+        else:
+            print 'using blockr'
+            self.t = Transactions(testnet=True)
+            self.spool = Spool(testnet=True)
 
         self.user1_pass = self._get_pass()
         self.user2_pass = self._get_pass()
@@ -47,7 +62,6 @@ class TestSpool(unittest.TestCase):
         self.user2_leaf = Wallet(self.user2_pass, testnet=True).address_from_path()
         self.user3_leaf = Wallet(self.user3_pass, testnet=True).address_from_path()
         self.file_hash = self._get_file_hash()
-        self.t = Transactions(testnet=True)
 
         print 'user1_pass: ', self.user1_pass
         print 'user2_pass: ', self.user2_pass
@@ -58,7 +72,13 @@ class TestSpool(unittest.TestCase):
         print 'user3_leaf: ', self.user3_leaf
         print 'file_hash :', self.file_hash
 
-        self.spool = Spool(testnet=True)
+        self.spool._t.import_address(self.user1_root[1], "test",)
+        self.spool._t.import_address(self.user1_leaf[1], "test",)
+        self.spool._t.import_address(self.user2_leaf[1], "test",)
+        self.spool._t.import_address(self.user3_leaf[1], "test",)
+        self.spool._t.import_address(self.file_hash[0], "test",)
+        self.spool._t.import_address(self.file_hash[1], "test",)
+
 
     def test_spool(self):
         # 1. Refill Federation wallet with necessary fuel and tokens

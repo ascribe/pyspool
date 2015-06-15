@@ -510,10 +510,13 @@ python -m unittest discover -v tests/
 
 To run the tests for the spool protocol you need to provide the _REFILL_ and _FEDERATION_ 
 wallet passwords. Note that these tests may take some time since we need to wait for the 
-bitcoin networ to confirm each transaction
+bitcoin network to confirm each transaction. This will by default use tbtc.blockr.io
 ```bash
 TEST_SPOOL=1 TEST_REFILL_PASS=<refill_pass> TEST_FEDERATION_PASS=<federation_pass> python -m unittest discover -v tests/
 ```
+
+You can also test with bitcoind by using `TEST_SPOOL=2` and providing the `TESTNET_USERNAME`, `TESTNET_PASSWORD`, 
+`TESTNET_HOST` and `TESTNET_PORT` environment variables to connect to the bitcoind rpc.
 
 ## Contributing
 Pull requests, feedback, suggestions are welcome.

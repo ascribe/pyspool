@@ -20,6 +20,7 @@ def dispatch(f):
         sync = kwargs.get('sync', False)
         ownsership = kwargs.get('ownership', False)
         testnet = args[0].testnet
+        t = args[0]._t
         from_address = args[1][1]
         to_address = args[2]
         password = args[4]
@@ -62,7 +63,6 @@ def dispatch(f):
         if sync:
             txid = f(*args, **kwargs)
             # lets give it some time for the transaction to reach the network
-            t = Transactions(testnet=testnet)
             confirmations = 0
             timeout = TIMEOUT
             while not confirmations:
@@ -75,9 +75,9 @@ def dispatch(f):
                     if e.message.find('code: 404') != -1:
                         timeout *= 2
                         if timeout > MAX_TIMEOUT:
-                            raise e
+                            raise
                     else:
-                        raise e
+                        raise
                 time.sleep(timeout)
             return txid
         else:

@@ -51,13 +51,13 @@ class TestBlockchainSpider(unittest.TestCase):
 
     def test_data(self):
         tree = self.tree
-        data = {0: tree[0]}
+        data = {0: BlockchainSpider.chain(tree, 0)}
         self.assertDictEqual(data, {0: [{'action': 'EDITIONS',
                                          'edition_number': 0,
                                          'from_address': u'mqXz83H4LCxjf2ie8hYNsTRByvtfV43Pa7',
                                          'number_editions': 10,
                                          'piece_address': u'myr2VcDnPKf997sjXx6rUFc4CtFH9sxNVS',
-                                         'timestamp_utc': 1432646255,
+                                         'timestamp_utc': 1432649855,
                                          'to_address': u'n2sQHoUghWUgSM8msqdmCim8pZ635YjoCD',
                                          'txid': u'fb22bbb83161f6904f1803ee1cdbed1b5836eb9ac51b102564400989780b48ea',
                                          'verb': 'ASCRIBESPOOL01EDITIONS10'},
@@ -66,7 +66,7 @@ class TestBlockchainSpider(unittest.TestCase):
                                         'from_address': u'mqXz83H4LCxjf2ie8hYNsTRByvtfV43Pa7',
                                         'number_editions': 10,
                                         'piece_address': u'myr2VcDnPKf997sjXx6rUFc4CtFH9sxNVS',
-                                        'timestamp_utc': 1432647405,
+                                        'timestamp_utc': 1432651005,
                                         'to_address': u'n2sQHoUghWUgSM8msqdmCim8pZ635YjoCD',
                                         'txid': u'02994a3ceee87be2210fa6e4a649bc0626e791f590bd8db22e7e1fd9fc66d038',
                                         'verb': 'ASCRIBESPOOL01REGISTER0'}]})

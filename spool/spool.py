@@ -2,6 +2,7 @@
 Main spool verb methods
 """
 from exceptions import Exception
+from collections import deque
 
 from transactions import Transactions
 from utils import dispatch
@@ -43,7 +44,7 @@ class Spool(object):
     The hash is passed to the methods has a tuple (file_hash, file_hash_metadata)
     """
 
-    def __init__(self, testnet=False):
+    def __init__(self, testnet=False, service='blockr', username='', password='', host='', port=''):
         """
 
         :param testnet:
@@ -51,7 +52,10 @@ class Spool(object):
         """
         self.testnet = testnet
         self._netcode = 'XTN' if testnet else 'BTC'
-        self._t = Transactions(testnet=testnet)
+        self._t = Transactions(service=service, testnet=testnet, username=username,
+                               password=password, host=host, port=port)
+        # simple cache for spent outputs. Useful so that rapid firing transactions don't use the same outputs
+        self._spents = deque(maxlen=50)
 
     @dispatch
     def register(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
@@ -299,6 +303,7 @@ class Spool(object):
     def _select_inputs(self, address, nfees, ntokens, min_confirmations=6):
         # selects the inputs for the spool transaction
         unspents = self._t.get(address, min_confirmations=min_confirmations)['unspents']
+        unspents = filter(lambda d: d not in self._spents, unspents)
         if len(unspents) == 0:
             raise Exception("No spendable outputs found")
 
@@ -306,7 +311,8 @@ class Spool(object):
         tokens = filter(lambda d: d['amount'] == self._t._dust, unspents)[:ntokens]
         if len(fees) != nfees or len(tokens) != ntokens:
             raise SpoolFundsError("Not enough outputs to spend. Refill your wallet")
-
+        self._spents.extend(fees)
+        self._spents.extend(tokens)
         return fees + tokens
 
 

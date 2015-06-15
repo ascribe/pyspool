@@ -37,13 +37,14 @@ class BlockchainSpider(object):
     with the SPOOL protocol
     """
 
-    def __init__(self, testnet=False):
+    def __init__(self, testnet=False, service='blockr', username='', password='', host='', port=''):
         """
 
         :param testnet: testnet flag. Defaults to False
         :return: An instance of the BlockainSpider
         """
-        self._t = Transactions(testnet=testnet)
+        self._t = Transactions(service=service, testnet=testnet, username=username,
+                               password=password, host=host, port=port)
 
     def history(self, hash):
         """
@@ -54,17 +55,17 @@ class BlockchainSpider(object):
         """
 
         # For now we only support searching the blockchain by the piece hash
-        txs = self._t.get(hash)['transactions']
+        txs = self._t.get(hash, max_transactions=10000)['transactions']
         tree = defaultdict(list)
         number_editions = 0
 
         for tx in txs:
             _tx = self._t.get(tx['txid'])
-            txid = _tx['tx']
+            txid = _tx['txid']
             verb_str = BlockchainSpider.check_script(_tx['vouts'])
             verb = Spoolverb.from_verb(verb_str)
             from_address, to_address, piece_address = BlockchainSpider._get_addresses(_tx)
-            timestamp_utc = BlockchainSpider._get_time_utc(_tx['time_utc'])
+            timestamp_utc = _tx['time']
             action = verb.action
 
             edition_number = 0
@@ -141,8 +142,8 @@ class BlockchainSpider(object):
         :return: string representation of the op_return
         """
 
-        for vout in [v for v in vouts[::-1] if v['extras']['script'].startswith('6a')]:
-            verb = BlockchainSpider.decode_op_return(vout['extras']['script'])
+        for vout in [v for v in vouts[::-1] if v['hex'].startswith('6a')]:
+            verb = BlockchainSpider.decode_op_return(vout['hex'])
             action = Spoolverb.from_verb(verb).action
             if action in Spoolverb.supported_actions:
                 return verb
