@@ -1,5 +1,5 @@
 import binascii
-import time
+import calendar
 
 from collections import namedtuple, defaultdict
 from exceptions import Exception
@@ -176,4 +176,4 @@ class BlockchainSpider(object):
         :return: unix timestamp
         """
         dt = datetime.strptime(time_utc_str, "%Y-%m-%dT%H:%M:%SZ")
-        return int(time.mktime(dt.utctimetuple()))
+        return int(calendar.timegm(dt.utctimetuple()))
