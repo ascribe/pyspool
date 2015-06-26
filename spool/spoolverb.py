@@ -17,7 +17,7 @@ class SpoolverbError(Exception):
 
 class Spoolverb(object):
 
-    supported_actions = ['REGISTER', 'CONSIGN', 'TRANSFER', 'LOAN', 'UNCONSIGN', 'FUEL', 'EDITIONS']
+    supported_actions = ['REGISTER', 'CONSIGN', 'TRANSFER', 'LOAN', 'UNCONSIGN', 'FUEL', 'EDITIONS', 'PIECE']
 
     def __init__(self, num_editions=None, edition_num=None, loan_start='',
                  loan_end='', meta='ASCRIBESPOOL', version='01', action=None):
@@ -50,7 +50,7 @@ class Spoolverb(object):
         :param verb: string representation of the verb e.g. ASCRIBESPOOL01LOAN12/150526150528
         :return: Spoolverb instance
         """
-        pattern = r'^(?P<meta>[A-Z]+)(?P<version>\d+)(?P<action>[A-Z]+)(?P<arg1>\d+)(\/(?P<arg2>\d+))?$'
+        pattern = r'^(?P<meta>[A-Z]+)(?P<version>\d+)(?P<action>[A-Z]+)(?P<arg1>\d+)?(\/(?P<arg2>\d+))?$'
         match = re.match(pattern, verb)
         if not match:
             raise SpoolverbError('Invalid spoolverb: {}'.format(verb))
@@ -68,9 +68,16 @@ class Spoolverb(object):
             loan_end = data['arg2'][6:]
             return cls(meta=meta, version=version, action=action, edition_num=int(edition_num),
                        loan_start=loan_start, loan_end=loan_end)
+        elif action in ['FUEL', 'PIECE']:
+            # no edition number for these verbs
+            return cls(meta=meta, version=version, action=action)
         else:
             edition_num = data['arg1']
             return cls(meta=meta, version=version, action=action, edition_num=int(edition_num))
+
+    @property
+    def piece(self):
+        return '{}{}PIECE'.format(self.meta, self.version)
 
     @property
     def register(self):

@@ -2,7 +2,7 @@
 Main spool verb methods
 """
 from exceptions import Exception
-from collections import deque
+from Queue import Queue
 
 from transactions import Transactions
 from utils import dispatch
@@ -55,7 +55,35 @@ class Spool(object):
         self._t = Transactions(service=service, testnet=testnet, username=username,
                                password=password, host=host, port=port)
         # simple cache for spent outputs. Useful so that rapid firing transactions don't use the same outputs
-        self._spents = deque(maxlen=50)
+        self._spents = Queue(maxsize=50)
+
+    @dispatch
+    def register_piece(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
+        """
+        Register a piece
+
+        :param from_address: Federation address. All register transactions originate from the the Federation wallet
+        :param to_address: Address registering the edition
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Federation wallet password. For signing the transaction
+        :param edition_num: The number of the edition to register. User edition_num=0 to register the master edition
+        :param min_confirmations: Override the number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
+        :return: transaction id
+        """
+        file_hash, file_hash_metadata = hash
+        path, from_address = from_address
+        verb = Spoolverb(edition_num=edition_num)
+        unsigned_tx = self.simple_spool_transaction(from_address,
+                                                    [file_hash, file_hash_metadata, to_address],
+                                                    op_return=verb.piece,
+                                                    min_confirmations=min_confirmations)
+
+        signed_tx = self._t.sign_transaction(unsigned_tx, password)
+        txid = self._t.push(signed_tx)
+        return txid
 
     @dispatch
     def register(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
@@ -269,7 +297,7 @@ class Spool(object):
         path, from_address = from_address
         verb = Spoolverb()
         # nfees + 1: nfees to refill plus one fee for the refill transaction itself
-        inputs = self._select_inputs(from_address, nfees + 1, ntokens, min_confirmations=min_confirmations)
+        inputs = self.select_inputs(from_address, nfees + 1, ntokens, min_confirmations=min_confirmations)
         outputs = [{'address': to_address, 'value': self._t._dust}] * ntokens
         outputs += [{'address': to_address, 'value': self._t._min_tx_fee}] * nfees
         outputs += [{'script': self._t._op_return_hex(verb.fuel), 'value': 0}]
@@ -292,7 +320,7 @@ class Spool(object):
         # list of addresses to send
         ntokens = len(to)
         nfees = self._t.estimate_fee(ntokens, 2) / 10000
-        inputs = self._select_inputs(from_address, nfees, ntokens, min_confirmations=min_confirmations)
+        inputs = self.select_inputs(from_address, nfees, ntokens, min_confirmations=min_confirmations)
         # outputs
         outputs = [{'address': to_address, 'value': self._t._dust} for to_address in to]
         outputs += [{'script': self._t._op_return_hex(op_return), 'value': 0}]
@@ -300,10 +328,10 @@ class Spool(object):
         unsigned_tx = self._t.build_transaction(inputs, outputs)
         return unsigned_tx
 
-    def _select_inputs(self, address, nfees, ntokens, min_confirmations=6):
+    def select_inputs(self, address, nfees, ntokens, min_confirmations=6):
         # selects the inputs for the spool transaction
         unspents = self._t.get(address, min_confirmations=min_confirmations)['unspents']
-        unspents = filter(lambda d: d not in self._spents, unspents)
+        unspents = filter(lambda d: d not in self._spents.queue, unspents)
         if len(unspents) == 0:
             raise Exception("No spendable outputs found")
 
@@ -311,8 +339,10 @@ class Spool(object):
         tokens = filter(lambda d: d['amount'] == self._t._dust, unspents)[:ntokens]
         if len(fees) != nfees or len(tokens) != ntokens:
             raise SpoolFundsError("Not enough outputs to spend. Refill your wallet")
-        self._spents.extend(fees)
-        self._spents.extend(tokens)
+        if self._spents.qsize() > 50 - (nfees + ntokens):
+            [self._spents.get() for i in range(self._spents.qsize() + nfees + ntokens - 50)]
+        [self._spents.put(fee) for fee in fees]
+        [self._spents.put(token) for token in tokens]
         return fees + tokens
 
 
