@@ -58,7 +58,7 @@ class Spool(object):
         self._spents = Queue(maxsize=50)
 
     @dispatch
-    def register_piece(self, from_address, to_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
+    def register_piece(self, from_address, to_address, hash, password, min_confirmations=6, sync=False, ownership=True):
         """
         Register a piece
 
@@ -75,7 +75,7 @@ class Spool(object):
         """
         file_hash, file_hash_metadata = hash
         path, from_address = from_address
-        verb = Spoolverb(edition_num=edition_num)
+        verb = Spoolverb()
         unsigned_tx = self.simple_spool_transaction(from_address,
                                                     [file_hash, file_hash_metadata, to_address],
                                                     op_return=verb.piece,
@@ -249,6 +249,34 @@ class Spool(object):
                                                     op_return=verb.loan,
                                                     min_confirmations=min_confirmations)
         signed_tx = self._t.sign_transaction(unsigned_tx, password, path=path)
+        txid = self._t.push(signed_tx)
+        return txid
+
+    @dispatch
+    def migrate(self, from_address, prev_address, new_address, hash, password, edition_num, min_confirmations=6, sync=False, ownership=True):
+        """
+        Migrate an edition
+
+        :param from_address: Federation address. All register transactions originate from the the Federation wallet
+        :param to_address: Address registering the edition
+        :param hash: Hash of the piece. Tuple (file_hash, file_hash_metadata)
+        :param password: Federation wallet password. For signing the transaction
+        :param edition_num: The number of the edition to register. User edition_num=0 to register the master edition
+        :param min_confirmations: Override the number of confirmations when chosing the inputs of the transaction. Defaults to 6
+        :param sync: Perform the transaction in synchronous mode, the call to the function will block until there is at
+        least on confirmation on the blockchain. Defaults to False
+        :param ownership: Check ownsership in the blockchain before pushing the transaction. Defaults to True
+        :return: transaction id
+        """
+        file_hash, file_hash_metadata = hash
+        path, from_address = from_address
+        verb = Spoolverb(edition_num=edition_num)
+        unsigned_tx = self.simple_spool_transaction(from_address,
+                                                    [file_hash, prev_address, new_address],
+                                                    op_return=verb.migrate,
+                                                    min_confirmations=min_confirmations)
+
+        signed_tx = self._t.sign_transaction(unsigned_tx, password)
         txid = self._t.push(signed_tx)
         return txid
 

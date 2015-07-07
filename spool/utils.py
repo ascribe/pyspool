@@ -19,13 +19,16 @@ def dispatch(f):
     def wrapper(*args, **kwargs):
         sync = kwargs.get('sync', False)
         ownsership = kwargs.get('ownership', False)
+        name = f.__name__
         testnet = args[0].testnet
         t = args[0]._t
         from_address = args[1][1]
         to_address = args[2]
         password = args[4]
-        edition_number = args[5]
-        name = f.__name__
+        # a piece has no edition number
+        print name
+        if name != 'register_piece':
+            edition_number = args[5]
         hash = ''
         if name not in ['refill', 'refill_main_wallet']:
             hash = args[3][0]

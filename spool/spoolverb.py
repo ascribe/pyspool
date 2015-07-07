@@ -17,7 +17,7 @@ class SpoolverbError(Exception):
 
 class Spoolverb(object):
 
-    supported_actions = ['REGISTER', 'CONSIGN', 'TRANSFER', 'LOAN', 'UNCONSIGN', 'FUEL', 'EDITIONS', 'PIECE']
+    supported_actions = ['REGISTER', 'CONSIGN', 'TRANSFER', 'LOAN', 'UNCONSIGN', 'FUEL', 'EDITIONS', 'PIECE', 'MIGRATE']
 
     def __init__(self, num_editions=None, edition_num=None, loan_start='',
                  loan_end='', meta='ASCRIBESPOOL', version='01', action=None):
@@ -103,6 +103,10 @@ class Spoolverb(object):
     def loan(self):
         return '{}{}LOAN{}/{}{}'.format(self.meta, self.version, self.edition_number,
                                         self.loan_start, self.loan_end)
+
+    @property
+    def migrate(self):
+        return '{}{}MIGRATE{}'.format(self.meta, self.version, self.edition_number)
 
     @property
     def fuel(self):
