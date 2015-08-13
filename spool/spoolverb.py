@@ -38,7 +38,7 @@ class Spoolverb(object):
         self.meta = meta
         self.version = version
         self.num_editions = num_editions
-        self.edition_number = edition_num
+        self.edition_number = edition_num if edition_num else ''
         self.loan_start = loan_start
         self.loan_end = loan_end
         self.action = action
