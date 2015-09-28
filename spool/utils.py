@@ -26,7 +26,7 @@ def dispatch(f):
         to_address = args[2]
         password = args[4]
         # a piece has no edition number
-        if name not in ['register_piece', 'consigned_registration':
+        if name not in ['register_piece', 'consigned_registration']:
             edition_number = args[5]
         hash = ''
         if name not in ['refill', 'refill_main_wallet']:
