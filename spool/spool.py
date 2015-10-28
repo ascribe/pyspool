@@ -23,6 +23,8 @@ class SpoolFundsError(Exception):
 
 
 class Spool(object):
+    FEE = 30000
+    TOKEN = 3000
 
     """
     Class that contains all Spool methods.
@@ -326,8 +328,8 @@ class Spool(object):
         """
         path, from_address = from_address
         unsigned_tx = self._t.simple_transaction(from_address,
-                                                       [(to_address, 10000)] * nfees + [(to_address, 600)] * ntokens,
-                                                       min_confirmations=min_confirmations)
+                                                 [(to_address, self.FEE)] * nfees + [(to_address, self.TOKEN)] * ntokens,
+                                                 min_confirmations=min_confirmations)
 
         signed_tx = self._t.sign_transaction(unsigned_tx, password)
         txid = self._t.push(signed_tx)
@@ -353,8 +355,8 @@ class Spool(object):
         verb = Spoolverb()
         # nfees + 1: nfees to refill plus one fee for the refill transaction itself
         inputs = self.select_inputs(from_address, nfees + 1, ntokens, min_confirmations=min_confirmations)
-        outputs = [{'address': to_address, 'value': self._t._dust}] * ntokens
-        outputs += [{'address': to_address, 'value': self._t._min_tx_fee}] * nfees
+        outputs = [{'address': to_address, 'value': self.TOKEN}] * ntokens
+        outputs += [{'address': to_address, 'value': self.FEE}] * nfees
         outputs += [{'script': self._t._op_return_hex(verb.fuel), 'value': 0}]
         unsigned_tx = self._t.build_transaction(inputs, outputs)
         signed_tx = self._t.sign_transaction(unsigned_tx, password, path=path)
@@ -374,10 +376,10 @@ class Spool(object):
         """
         # list of addresses to send
         ntokens = len(to)
-        nfees = self._t.estimate_fee(ntokens, 2) / 10000
+        nfees = self._t.estimate_fee(ntokens, 2) / self.FEE
         inputs = self.select_inputs(from_address, nfees, ntokens, min_confirmations=min_confirmations)
         # outputs
-        outputs = [{'address': to_address, 'value': self._t._dust} for to_address in to]
+        outputs = [{'address': to_address, 'value': self.TOKEN} for to_address in to]
         outputs += [{'script': self._t._op_return_hex(op_return), 'value': 0}]
         # build transaction
         unsigned_tx = self._t.build_transaction(inputs, outputs)
@@ -390,8 +392,8 @@ class Spool(object):
         if len(unspents) == 0:
             raise Exception("No spendable outputs found")
 
-        fees = filter(lambda d: d['amount'] == self._t._min_tx_fee, unspents)[:nfees]
-        tokens = filter(lambda d: d['amount'] == self._t._dust, unspents)[:ntokens]
+        fees = filter(lambda d: d['amount'] == self.FEE, unspents)[:nfees]
+        tokens = filter(lambda d: d['amount'] == self.TOKEN, unspents)[:ntokens]
         if len(fees) != nfees or len(tokens) != ntokens:
             raise SpoolFundsError("Not enough outputs to spend. Refill your wallet")
         if self._spents.qsize() > 50 - (nfees + ntokens):
