@@ -1,0 +1,13 @@
+*.swp
+.cache
+.dockerignore
+.git
+.ropeproject
+dist
+env
+.travis.yml
+docker-compose.yml
+Dockerfile
+LICENSE.md
+README.md
+requirements.txt

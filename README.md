@@ -1,4 +1,9 @@
 # pyspool
+
+[![PyPI](https://img.shields.io/pypi/v/pyspool.svg)](https://pypi.python.org/pypi/pyspool)
+[![Travis](https://img.shields.io/travis/ascribe/pyspool.svg)](https://travis-ci.org/ascribe/pyspool)
+[![Codecov](https://img.shields.io/codecov/c/github/ascribe/pyspool.svg)](https://codecov.io/github/ascribe/pyspool?branch=master)
+
 pyspool is a reference implementation of the Secure Public Online Ownership Ledger 
 [SPOOL](https://github.com/ascribe/spool) and part of the development stack of [ascribe.io](https://www.ascribe.io/)
 
@@ -16,6 +21,7 @@ pyspool is a reference implementation of the Secure Public Online Ownership Ledg
     - [BlockchainSpider](#blockchainspider)
     - [Ownsership](#ownership)
 - [Testing](#testing)
+    - [Using Docker](#using-docker)
 - [Contributing](#contributing)
 
 ## Install
@@ -517,6 +523,31 @@ TEST_SPOOL=1 TEST_REFILL_PASS=<refill_pass> TEST_FEDERATION_PASS=<federation_pas
 
 You can also test with bitcoind by using `TEST_SPOOL=2` and providing the `TESTNET_USERNAME`, `TESTNET_PASSWORD`, 
 `TESTNET_HOST` and `TESTNET_PORT` environment variables to connect to the bitcoind rpc.
+
+
+### Using Docker
+You can use docker to run the tests for pyspool, or to work on pyspool.
+
+To build the docker image:
+
+```bash
+docker build -t pyspool .
+```
+
+Simply running:
+
+```bash
+docker run --rm pyspool
+```
+
+will run the tests, without bitcoin network transactions.
+
+You can also pass your own command, as in:
+
+```bash
+docker run --rm pyspool python -m unittest discover -v tests/
+```
+
 
 ## Contributing
 Pull requests, feedback, suggestions are welcome.
