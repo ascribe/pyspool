@@ -2,6 +2,7 @@ import unittest
 import os
 import random
 import requests
+from Queue import Queue
 
 from string import ascii_letters
 from spool import Wallet
@@ -203,3 +204,23 @@ class TestSpool(unittest.TestCase):
 
         f = File('/tmp/test', testnet=True, title=title)
         return f.file_hash, f.file_hash_metadata
+
+
+def test_spool_funds_error_class_init():
+    from spool.spool import SpoolFundsError
+    err_msg = 'message'
+    spool_funds_error = SpoolFundsError(err_msg)
+    assert spool_funds_error.message == err_msg
+    assert spool_funds_error.__str__() == repr(err_msg)
+
+
+def test_spool_class_init_default():
+    from spool import Spool
+    spool = Spool()
+    assert spool.testnet is False
+    assert spool._netcode == 'BTC'
+    assert isinstance(spool._t, Transactions)
+    assert spool._t._service.name == 'BitcoinBlockrService'
+    assert spool._t.testnet is False
+    assert isinstance(spool._spents, Queue)
+    assert spool._spents.maxsize == 50
