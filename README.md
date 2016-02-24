@@ -511,14 +511,14 @@ Exception to be raised when an address does not have permissions to perform an a
 ## Testing
 Run tests that require no transactions to be made in the bitcoin network
 ```bash
-python -m unittest discover -v tests/
+py.test -v
 ```
 
 To run the tests for the spool protocol you need to provide the _REFILL_ and _FEDERATION_ 
 wallet passwords. Note that these tests may take some time since we need to wait for the
 bitcoin network to confirm each transaction. This will by default use tbtc.blockr.io
 ```bash
-TEST_SPOOL=1 TEST_REFILL_PASS=<refill_pass> TEST_FEDERATION_PASS=<federation_pass> python -m unittest discover -v tests/
+TEST_SPOOL=1 TEST_REFILL_PASS=<refill_pass> TEST_FEDERATION_PASS=<federation_pass> py.test -v
 ```
 
 You can also test with bitcoind by using `TEST_SPOOL=2` and providing the `TESTNET_USERNAME`, `TESTNET_PASSWORD`, 
@@ -545,7 +545,7 @@ will run the tests, without bitcoin network transactions.
 You can also pass your own command, as in:
 
 ```bash
-docker run --rm pyspool python -m unittest discover -v tests/
+docker run --rm pyspool py.test --verbose tests/test_spool.py
 ```
 
 
