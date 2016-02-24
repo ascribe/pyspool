@@ -25,9 +25,9 @@ pyspool is a reference implementation of the Secure Public Online Ownership Ledg
 - [Contributing](#contributing)
 
 ## Install
-```
-pip install -r requirements.txt
-python setup.py install
+
+```bash
+pip install pyspool
 ```
 
 ## Overview
