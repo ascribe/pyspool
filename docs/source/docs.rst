@@ -31,7 +31,7 @@ and build the docs:
 
 Viewing the documentation
 -------------------------
-You can start a little web server to view the docs at http://localhost:38080/
+You can start a little web server to view the docs at http://localhost:38181/
 
 .. code-block:: bash
 
