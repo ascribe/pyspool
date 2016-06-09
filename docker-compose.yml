@@ -2,25 +2,33 @@ version: '2'
 
 services:
   spool:
-    build: .
+    build:
+      context: .
     volumes:
-      - ./docs:/usr/src/app/docs
-      - ./spool:/usr/src/app/spool
-      - ./tests:/usr/src/app/tests
-      - ./pytest.ini:/usr/src/app/pytest.ini
-      - ./setup.cfg:/usr/src/app/setup.cfg
-      - ./setup.py:/usr/src/app/setup.py
+      - .:/usr/src/app
+    environment:
+      BITCOIN_HOST: bitcoin
+      BITCOIN_RPCUSER: merlin
+      BITCOIN_RPCPASSWORD: secret
     command: py.test --verbose
-  bdocs:
-    build: .
+  bitcoin:
+    image: ascribe/bitcoin
     volumes:
-      - ./docs:/usr/src/app/docs
-      - ./spool:/usr/src/app/spool
+      -  ./bitcoin_regtest.conf:/root/.bitcoin/bitcoin.conf
+    ports:
+      - '18332'
+      - '18333'
+    command: bitcoind -regtest -printtoconsole
+  bdocs:
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app/
     working_dir: /usr/src/app/docs
     command: make html
   vdocs:
     image: nginx
     ports:
-      - '38181:80'
+      - '40084:80'
     volumes:
       - ./docs/build/html:/usr/share/nginx/html

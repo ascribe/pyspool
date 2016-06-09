@@ -1,14 +1,18 @@
+import os
 import unittest
 
-from spool import BlockchainSpider
 from transactions import Transactions
+from transactions.services.daemonservice import BitcoinDaemonService
+
+from spool import BlockchainSpider
+
 
 PIECE_HASH = 'myr2VcDnPKf997sjXx6rUFc4CtFH9sxNVS'
 OP_RETURN_HEX = '6a204153435249424553504f4f4c30314c4f414e312f313530353232313530353233'
 TXID = 'fb22bbb83161f6904f1803ee1cdbed1b5836eb9ac51b102564400989780b48ea'
 
 
-@unittest.skip
+@unittest.skipIf(os.environ.get('TRAVIS'), 'sslv3 alert handshake failure')
 class TestBlockchainSpider(unittest.TestCase):
 
     @classmethod
@@ -16,12 +20,14 @@ class TestBlockchainSpider(unittest.TestCase):
         bcs = BlockchainSpider(testnet=True)
         cls.tree = bcs.history(PIECE_HASH)
 
+    @unittest.skip
     def test_history(self):
         tree = self.tree
         self.assertEqual(len(tree), 2)
         self.assertEqual(len(tree[0]), 2)
         self.assertEqual(len(tree[1]), 5)
 
+    @unittest.skip
     def test_chain(self):
         tree = self.tree
 
@@ -50,6 +56,7 @@ class TestBlockchainSpider(unittest.TestCase):
         self.assertEqual(len(chain), 4)
         self.assertEqual(chain[-1]['action'], 'UNCONSIGN')
 
+    @unittest.skip
     def test_data(self):
         tree = self.tree
         data = {0: BlockchainSpider.chain(tree, 0)}
@@ -71,3 +78,22 @@ class TestBlockchainSpider(unittest.TestCase):
                                         'to_address': u'n2sQHoUghWUgSM8msqdmCim8pZ635YjoCD',
                                         'txid': u'02994a3ceee87be2210fa6e4a649bc0626e791f590bd8db22e7e1fd9fc66d038',
                                         'verb': 'ASCRIBESPOOL01REGISTER0'}]})
+
+
+def test_blockchainspider_init(rpcuser, rpcpassword, host, port):
+    from spool.spoolex import BlockchainSpider
+    blockchain_spider = BlockchainSpider(
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert isinstance(blockchain_spider._t, Transactions)
+    assert blockchain_spider._t.testnet is True
+    assert blockchain_spider._t._service._username == rpcuser
+    assert blockchain_spider._t._service._password == rpcpassword
+    assert blockchain_spider._t._service._host == host
+    assert blockchain_spider._t._service._port == port
+    assert isinstance(blockchain_spider._t._service, BitcoinDaemonService)

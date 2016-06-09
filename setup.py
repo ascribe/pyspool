@@ -37,6 +37,7 @@ install_requires = [
 
 dependency_links = [
     'git+https://github.com/richardkiss/pycoin@80aeee52e58fed72b136cbf1aec1bbbb8d1e01a8#egg=pycoin',
+    'git+https://github.com/sbellem/python-bitcoinrpc.git@setup#egg=python_bitcoinrpc-0.3.1',
 ]
 
 tests_require = [
@@ -47,6 +48,7 @@ tests_require = [
     'pylint',
     'pytest',
     'pytest-cov',
+    'python-bitcoinrpc>=0.3.1',
 ]
 
 dev_require = [

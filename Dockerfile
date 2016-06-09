@@ -7,6 +7,6 @@ RUN pip install --upgrade pip
 
 COPY . /usr/src/app
 
-RUN pip install -e .[dev]
+RUN pip install --no-cache-dir --process-dependency-links -e .[dev]
 
 CMD ["py.test", "-v"]
