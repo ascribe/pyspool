@@ -1,4 +1,5 @@
 from exceptions import Exception
+
 from spoolex import BlockchainSpider
 
 
@@ -12,7 +13,7 @@ class OwnershipError(Exception):
         self.message = message
 
     def __str__(self):
-        return repr(self.message)
+        return self.message
 
 
 class Ownership(object):

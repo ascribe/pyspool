@@ -206,14 +206,6 @@ class TestSpool(unittest.TestCase):
         return f.file_hash, f.file_hash_metadata
 
 
-def test_spool_funds_error_class_init():
-    from spool.spool import SpoolFundsError
-    err_msg = 'message'
-    spool_funds_error = SpoolFundsError(err_msg)
-    assert spool_funds_error.message == err_msg
-    assert spool_funds_error.__str__() == repr(err_msg)
-
-
 def test_spool_class_init_default():
     from spool import Spool
     spool = Spool()
