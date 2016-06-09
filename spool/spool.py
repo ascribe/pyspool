@@ -17,7 +17,7 @@ class SpoolFundsError(Exception):
         self.message = message
 
     def __str__(self):
-        return repr(self.message)
+        return self.message
 
 
 class Spool(object):
