@@ -45,10 +45,12 @@ class Spool(object):
     Attributes:
         FEE (int): transaction fee
         TOKEN (int): token
+        SPENTS_QUEUE_MAXSIZE (int): spent outputs queue maximum size
 
     """
     FEE = 30000
     TOKEN = 3000
+    SPENTS_QUEUE_MAXSIZE = 50
 
     def __init__(self, testnet=False, service='blockr', username='', password='', host='', port=''):
         """
@@ -70,7 +72,7 @@ class Spool(object):
         self._t = Transactions(service=service, testnet=testnet, username=username,
                                password=password, host=host, port=port)
         # simple cache for spent outputs. Useful so that rapid firing transactions don't use the same outputs
-        self._spents = Queue(maxsize=50)
+        self._spents = Queue(maxsize=self.SPENTS_QUEUE_MAXSIZE)
 
     @dispatch
     def register_piece(self, from_address, to_address, hash, password, min_confirmations=6, sync=False, ownership=True):
@@ -462,8 +464,8 @@ class Spool(object):
         tokens = filter(lambda d: d['amount'] == self.TOKEN, unspents)[:ntokens]
         if len(fees) != nfees or len(tokens) != ntokens:
             raise SpoolFundsError("Not enough outputs to spend. Refill your wallet")
-        if self._spents.qsize() > 50 - (nfees + ntokens):
-            [self._spents.get() for i in range(self._spents.qsize() + nfees + ntokens - 50)]
+        if self._spents.qsize() > self.SPENTS_QUEUE_MAXSIZE - (nfees + ntokens):
+            [self._spents.get() for i in range(self._spents.qsize() + nfees + ntokens - self.SPENTS_QUEUE_MAXSIZE)]
         [self._spents.put(fee) for fee in fees]
         [self._spents.put(token) for token in tokens]
         return fees + tokens

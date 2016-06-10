@@ -35,22 +35,35 @@ def rpcurl(rpcuser, rpcpassword, host, port):
 
 
 @pytest.fixture
-def rpcconn(rpcurl):
+def rpconn(rpcurl):
     return AuthServiceProxy(rpcurl)
 
 
 @pytest.fixture
-def init_blockchain(rpcconn):
+def init_blockchain(rpconn):
     """
     Initialize the blockchain if needed, making sure that the balance is at
     least 50 bitcoins. The block reward only happens after 100 blocks, and for
     this reason at least 101 blocks are needed.
 
     """
-    block_count = rpcconn.getblockcount()
+    block_count = rpconn.getblockcount()
     if block_count < 101:
-        rpcconn.generate(101 - block_count)
+        rpconn.generate(101 - block_count)
     else:
-        balance = rpcconn.getbalance()
+        balance = rpconn.getbalance()
         if balance < 50:
-            rpcconn.generate(1)
+            rpconn.generate(1)
+
+
+@pytest.fixture
+def spool_regtest(rpcuser, rpcpassword, host, port):
+    from spool import Spool
+    return Spool(
+        service='daemon',
+        testnet=True,
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )

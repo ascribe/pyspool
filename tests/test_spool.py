@@ -1,15 +1,16 @@
-import unittest
+from __future__ import division
+
 import os
 import random
 import requests
+import unittest
 from Queue import Queue
-
 from string import ascii_letters
-from spool import Wallet
-from spool import File
-from spool import Spool
+
+import pytest
 from transactions import Transactions
-from spool import BlockchainSpider
+
+from spool import BlockchainSpider, File, Spool, Wallet
 
 requests.packages.urllib3.disable_warnings()
 
@@ -216,3 +217,69 @@ def test_spool_class_init_default():
     assert spool._t.testnet is False
     assert isinstance(spool._spents, Queue)
     assert spool._spents.maxsize == 50
+
+
+def test_no_funds_select_inputs(spool_regtest, rpconn):
+    addr = rpconn.getnewaddress()
+    with pytest.raises(Exception) as exc:
+        spool_regtest.select_inputs(addr, 1, 1)
+    assert exc.value.args[0] == 'No spendable outputs found'
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_insufficient_funds_select_inputs(spool_regtest, rpconn):
+    from spool.spool import SpoolFundsError
+    addr = rpconn.getnewaddress()
+    rpconn.sendtoaddress(addr, 1)
+    rpconn.generate(1)
+    with pytest.raises(SpoolFundsError) as exc:
+        spool_regtest.select_inputs(addr, 1, 1, min_confirmations=1)
+    assert isinstance(exc.value, SpoolFundsError)
+    assert (exc.value.message ==
+            'Not enough outputs to spend. Refill your wallet')
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_select_inputs(spool_regtest, rpconn):
+    from spool import Spool
+    addr = rpconn.getnewaddress()
+    txid_fee = rpconn.sendtoaddress(addr, Spool.FEE/100000000)
+    txid_token = rpconn.sendtoaddress(addr, Spool.TOKEN/100000000)
+    rpconn.generate(1)
+    inputs = spool_regtest.select_inputs(addr, 1, 1, min_confirmations=1)
+    assert len(inputs) == 2
+    fee_input = inputs[0]       # NOTE: assumes fees are first
+    token_input = inputs[1]     # NOTE: assumes tokens are last
+    assert fee_input['txid'] == txid_fee
+    assert fee_input['amount'] == Spool.FEE
+    assert fee_input['confirmations'] == 1
+    assert token_input['txid'] == txid_token
+    assert token_input['amount'] == Spool.TOKEN
+    assert token_input['confirmations'] == 1
+    assert spool_regtest._spents.qsize() == 2
+    assert spool_regtest._spents.get() == fee_input
+    assert spool_regtest._spents.get() == token_input
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_clear_spents_queue_select_inputs(spool_regtest, rpconn):
+    from spool import Spool
+    addr = rpconn.getnewaddress()
+    txid_fee = rpconn.sendtoaddress(addr, Spool.FEE/100000000)
+    txid_token = rpconn.sendtoaddress(addr, Spool.TOKEN/100000000)
+    rpconn.generate(1)
+    spool_regtest.SPENTS_QUEUE_MAXSIZE = 2
+    spool_regtest._spents.put('dummy')
+    inputs = spool_regtest.select_inputs(addr, 1, 1, min_confirmations=1)
+    assert len(inputs) == 2
+    fee_input = inputs[0]       # NOTE: assumes fees are first
+    token_input = inputs[1]     # NOTE: assumes tokens are last
+    assert fee_input['txid'] == txid_fee
+    assert fee_input['amount'] == Spool.FEE
+    assert fee_input['confirmations'] == 1
+    assert token_input['txid'] == txid_token
+    assert token_input['amount'] == Spool.TOKEN
+    assert token_input['confirmations'] == 1
+    assert spool_regtest._spents.qsize() == 2
+    assert spool_regtest._spents.get() == fee_input
+    assert spool_regtest._spents.get() == token_input
