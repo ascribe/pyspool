@@ -16,6 +16,7 @@ spoolverb = SPOOLVERB('ASCRIBESPOOL01REGISTER',
                       'ASCRIBESPOOL01LOAN',
                       'ASCRIBESPOOL01UNCONSIGN',
                       'ASCRIBESPOOL01FUEL')
+TIME_FORMAT = '%Y-%m-%dT%H:%M:%S %Z'
 
 
 class InvalidTransactionError(Exception):
@@ -129,8 +130,13 @@ class BlockchainSpider(object):
     def decode_op_return(op_return_hex):
         """
         Decodes the op_return hex representation into a string
-        :param op_return_hex: hex representation of the op_return
-        :return: string representation of the op_return
+
+        Args:
+            op_return_hex (str): hex representation of the op_return
+
+        Returns:
+            str: tring representation of the op_return
+
         """
         return binascii.unhexlify(op_return_hex[4:])
 
@@ -170,11 +176,16 @@ class BlockchainSpider(object):
     @staticmethod
     def _get_time_utc(time_utc_str):
         """
-        Convert a string representation of the time (as returned by blockr.io api) into unix
-        timestamp
+        Convert a string representation of the time (as returned by
+        blockr.io api) into unix timestamp.
 
-        :param time_utc_str: string representation of the time
-        :return: unix timestamp
+        Args:
+            time_utc_str (str): string representation of the time, with the
+                format: `'%Y-%m-%dT%H:%M:%S %Z'`
+
+        Returns:
+            int: unix timestamp
+
         """
-        dt = datetime.strptime(time_utc_str, "%Y-%m-%dT%H:%M:%SZ")
+        dt = datetime.strptime(time_utc_str, TIME_FORMAT)
         return int(calendar.timegm(dt.utctimetuple()))

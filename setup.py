@@ -41,7 +41,6 @@ dependency_links = [
 ]
 
 tests_require = [
-    'pytest',
     'coverage',
     'pep8',
     'pyflakes',
@@ -49,6 +48,7 @@ tests_require = [
     'pytest',
     'pytest-cov',
     'python-bitcoinrpc>=0.3.1',
+    'pytz',
 ]
 
 dev_require = [
