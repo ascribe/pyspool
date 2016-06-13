@@ -445,3 +445,289 @@ def test_register_edition(rpconn,
     assert piece_hashes[1] in addresses
     assert asm.split(' ')[0] == 'OP_RETURN'
     assert codecs.decode(asm.split(' ')[1], 'hex') == 'ASCRIBESPOOL01REGISTER3'
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_consigned_registration(rpconn,
+                                federation_hd_address,
+                                alice_hd_address,
+                                piece_hashes,
+                                spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.consigned_registration(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert piece_hashes[1] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert (codecs.decode(asm.split(' ')[1], 'hex') ==
+            'ASCRIBESPOOL01CONSIGNEDREGISTRATION')
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_editions(rpconn,
+                  federation_hd_address,
+                  alice_hd_address,
+                  piece_hashes,
+                  spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.editions(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        7,
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert piece_hashes[1] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert codecs.decode(asm.split(' ')[1], 'hex') == 'ASCRIBESPOOL01EDITIONS7'
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_transfer(rpconn,
+                  federation_hd_address,
+                  alice_hd_address,
+                  piece_hashes,
+                  spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.transfer(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        5,
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert codecs.decode(asm.split(' ')[1], 'hex') == 'ASCRIBESPOOL01TRANSFER5'
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_consign(rpconn,
+                 federation_hd_address,
+                 alice_hd_address,
+                 piece_hashes,
+                 spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.consign(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        4,
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert codecs.decode(asm.split(' ')[1], 'hex') == 'ASCRIBESPOOL01CONSIGN4'
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_unconsign(rpconn,
+                   federation_hd_address,
+                   alice_hd_address,
+                   piece_hashes,
+                   spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.unconsign(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        8,
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert (codecs.decode(asm.split(' ')[1], 'hex') ==
+            'ASCRIBESPOOL01UNCONSIGN8')
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_loan(rpconn, federation_hd_address,
+              alice_hd_address, piece_hashes, spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.loan(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        2,
+        '160613',
+        '160701',
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert (codecs.decode(asm.split(' ')[1], 'hex') ==
+            'ASCRIBESPOOL01LOAN2/160613160701')
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_migrate(rpconn,
+                 federation_hd_address,
+                 alice_hd_address,
+                 piece_hashes,
+                 spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    new_address = rpconn.getnewaddress()
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.migrate(
+        ('', federation_hd_address),
+        alice_hd_address,
+        new_address,
+        piece_hashes,
+        b'federation-secret',
+        9,
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert new_address in addresses
+    assert piece_hashes[0] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert codecs.decode(asm.split(' ')[1], 'hex') == 'ASCRIBESPOOL01MIGRATE9'
