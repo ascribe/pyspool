@@ -6,8 +6,10 @@ import requests
 import unittest
 from Queue import Queue
 from string import ascii_letters
+from uuid import uuid1
 
 import pytest
+from pycoin.key.BIP32Node import BIP32Node
 from transactions import Transactions
 
 from spool import BlockchainSpider, File, Spool, Wallet
@@ -219,6 +221,17 @@ def test_spool_class_init_default():
     assert spool._spents.maxsize == 50
 
 
+@pytest.mark.usefixtures('init_blockchain')
+def test_simple_spool_transaction(spool_regtest, rpconn):
+    alice, bob = rpconn.getnewaddress(), rpconn.getnewaddress()
+    rpconn.sendtoaddress(alice, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(alice, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    tx = spool_regtest.simple_spool_transaction(
+        alice, (bob,), 'ascribespool123verb', min_confirmations=1)
+    assert tx
+
+
 def test_no_funds_select_inputs(spool_regtest, rpconn):
     addr = rpconn.getnewaddress()
     with pytest.raises(Exception) as exc:
@@ -283,3 +296,109 @@ def test_clear_spents_queue_select_inputs(spool_regtest, rpconn):
     assert spool_regtest._spents.qsize() == 2
     assert spool_regtest._spents.get() == fee_input
     assert spool_regtest._spents.get() == token_input
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_refill_main_wallet(spool_regtest, rpconn):
+    src_wallet_passowrd = uuid1().hex.encode('utf-8')
+    src_wallet = BIP32Node.from_master_secret(src_wallet_passowrd,
+                                              netcode='XTN')
+    dest_wallet_passowrd = uuid1().hex.encode('utf-8')
+    dest_wallet = BIP32Node.from_master_secret(dest_wallet_passowrd,
+                                               netcode='XTN')
+    src_address = src_wallet.bitcoin_address()
+    dest_address = dest_wallet.bitcoin_address()
+    rpconn.importaddress(src_address)
+    rpconn.importaddress(dest_address)
+    rpconn.sendtoaddress(src_address, 1)
+    rpconn.generate(1)
+    txid = spool_regtest.refill_main_wallet(
+        ('', src_address),
+        dest_address,
+        1,
+        1,
+        src_wallet_passowrd,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    values = (vout['value'] * 100000000 for vout in raw_tx['vout'] if
+              vout['scriptPubKey']['addresses'].pop() == dest_address)
+    assert spool_regtest.FEE in values
+    assert spool_regtest.TOKEN in values
+    assert (rpconn.getreceivedbyaddress(dest_address) * 100000000 ==
+            spool_regtest.FEE + spool_regtest.TOKEN)
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_refill_fuel(spool_regtest, rpconn):
+    src_wallet_passowrd = uuid1().hex.encode('utf-8')
+    src_wallet = BIP32Node.from_master_secret(src_wallet_passowrd,
+                                              netcode='XTN')
+    dest_wallet_passowrd = uuid1().hex.encode('utf-8')
+    dest_wallet = BIP32Node.from_master_secret(dest_wallet_passowrd,
+                                               netcode='XTN')
+    src_address = src_wallet.bitcoin_address()
+    dest_address = dest_wallet.bitcoin_address()
+    rpconn.importaddress(src_address)
+    rpconn.importaddress(dest_address)
+    rpconn.sendtoaddress(src_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(src_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(
+        src_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.refill(
+        ('', src_address),
+        dest_address,
+        1,
+        1,
+        src_wallet_passowrd,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    values = (vout['value'] * 100000000 for vout in raw_tx['vout'] if
+              vout['scriptPubKey']['addresses'].pop() == dest_address)
+    values = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            addr = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if addr == dest_address:
+                values.append(vout['value'] * 100000000)
+
+    assert spool_regtest.FEE in values
+    assert spool_regtest.TOKEN in values
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert asm.split(' ')[1] == '4153435249424553504f4f4c30314655454c'
+    assert spool_regtest.FEE in values
+    assert spool_regtest.TOKEN in values
+    assert (rpconn.getreceivedbyaddress(dest_address) * 100000000 ==
+            spool_regtest.FEE + spool_regtest.TOKEN)
+
+
+def test_register_piece(rpconn,
+                        federation_hd_address,
+                        alice_hd_address,
+                        piece_hashes,
+                        spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.register_piece(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        min_confirmations=1,
+    )
+    assert txid

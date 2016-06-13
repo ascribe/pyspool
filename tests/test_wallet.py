@@ -25,6 +25,6 @@ class TestWallet(unittest.TestCase):
         wallet = Wallet(MASTER_PASSWORD)
 
         path, address = wallet.address_from_path()
-        t = datetime.now()
+        t = datetime.utcnow()
         now = '%s/%s/%s/%s/%s' % (t.year, t.month, t.day, t.hour, t.minute)
         self.assertTrue(path.find(now) != -1)
