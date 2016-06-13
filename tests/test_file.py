@@ -1,6 +1,9 @@
-import unittest
+# -*- coding: utf-8 -*-
 
-from spool import File
+from __future__ import unicode_literals
+
+import pytest
+
 
 FILENAME = 'tests/ascribe.png'
 FILE_HASH_TESTNET = 'mv5yDkR5dnjGHxietq7CH78WHk8vzsu4vH'
@@ -10,27 +13,32 @@ FILE_HASH_METADATA_MAINNET = '1DF1VqUujgz38fL1JNMsm1mzKBgDoQgXCb'
 METADATA = {'title': 'ascribe', 'artist': 'Rodolphe Marques'}
 
 
-class TestFileTestnet(unittest.TestCase):
-
-    def test_file_no_metadata(self):
-        f = File(FILENAME, testnet=True)
-        self.assertEqual(f.file_hash, FILE_HASH_TESTNET)
-        self.assertEqual(f.file_hash_metadata, FILE_HASH_TESTNET)
-
-    def test_file_metadata(self):
-        f = File(FILENAME, testnet=True, title=METADATA['title'], artist=METADATA['artist'])
-        self.assertEqual(f.file_hash_metadata, FILE_HASH_METADATA_TESTNET)
-        self.assertNotEqual(f.file_hash_metadata, f.file_hash)
+@pytest.mark.parametrize('testnet,file_hash', [
+    (True, FILE_HASH_TESTNET),
+    (False, FILE_HASH_MAINNET),
+])
+def test_file_no_metadata(testnet, file_hash):
+    from spool import File
+    f = File(FILENAME, testnet=testnet)
+    assert f.file_hash == file_hash
+    assert f.file_hash_metadata == file_hash
 
 
-class TestFileMainnet(unittest.TestCase):
+@pytest.mark.parametrize('testnet,file_hash_metadata', [
+    (True, FILE_HASH_METADATA_TESTNET),
+    (False, FILE_HASH_METADATA_MAINNET),
+])
+def test_file_metadata(testnet, file_hash_metadata):
+    from spool import File
+    f = File(FILENAME,
+             testnet=testnet,
+             title=METADATA['title'],
+             artist=METADATA['artist'])
+    assert f.file_hash_metadata == file_hash_metadata
+    assert f.file_hash_metadata != f.file_hash
 
-    def test_file_no_metadata(self):
-        f = File(FILENAME)
-        self.assertEqual(f.file_hash, FILE_HASH_MAINNET)
-        self.assertEqual(f.file_hash_metadata, FILE_HASH_MAINNET)
 
-    def test_file_metadata(self):
-        f = File(FILENAME, title=METADATA['title'], artist=METADATA['artist'])
-        self.assertEqual(f.file_hash_metadata, FILE_HASH_METADATA_MAINNET)
-        self.assertNotEqual(f.file_hash_metadata, f.file_hash)
+def test_file_from_hash():
+    from spool import File
+    f = File.from_hash(FILE_HASH_TESTNET)
+    assert f.hash == FILE_HASH_TESTNET
