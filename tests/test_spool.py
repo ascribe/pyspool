@@ -1,5 +1,6 @@
 from __future__ import division
 
+import codecs
 import os
 import random
 import requests
@@ -382,6 +383,7 @@ def test_refill_fuel(spool_regtest, rpconn):
             spool_regtest.FEE + spool_regtest.TOKEN)
 
 
+@pytest.mark.usefixtures('init_blockchain')
 def test_register_piece(rpconn,
                         federation_hd_address,
                         alice_hd_address,
@@ -402,3 +404,44 @@ def test_register_piece(rpconn,
         min_confirmations=1,
     )
     assert txid
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_register_edition(rpconn,
+                          federation_hd_address,
+                          alice_hd_address,
+                          piece_hashes,
+                          spool_regtest):
+    rpconn.importaddress(federation_hd_address)
+    rpconn.importaddress(alice_hd_address)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.FEE/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.sendtoaddress(federation_hd_address, spool_regtest.TOKEN/100000000)
+    rpconn.generate(1)
+    txid = spool_regtest.register(
+        ('', federation_hd_address),
+        alice_hd_address,
+        piece_hashes,
+        b'federation-secret',
+        3,
+        min_confirmations=1,
+    )
+    assert txid
+    raw_txid = rpconn.getrawtransaction(txid)
+    raw_tx = rpconn.decoderawtransaction(raw_txid)
+    addresses = []
+    asm = None
+    for vout in raw_tx['vout']:
+        try:
+            address = vout['scriptPubKey']['addresses'].pop()
+        except KeyError:
+            asm = vout['scriptPubKey']['asm']
+        else:
+            if vout['value'] * 100000000 == spool_regtest.TOKEN:
+                addresses.append(address)
+    assert alice_hd_address in addresses
+    assert piece_hashes[0] in addresses
+    assert piece_hashes[1] in addresses
+    assert asm.split(' ')[0] == 'OP_RETURN'
+    assert codecs.decode(asm.split(' ')[1], 'hex') == 'ASCRIBESPOOL01REGISTER3'
