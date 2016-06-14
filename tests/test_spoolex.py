@@ -33,6 +33,71 @@ def test_blockchainspider_init(rpcuser, rpcpassword, host, port):
 
 
 @pytest.mark.usefixtures('init_blockchain')
+def test_check_script(rpconn, piece_hashes, spool_regtest, transactions):
+    """
+    Test :staticmethod:`check_script`.
+
+    Args;
+        alice (str): bitcoin address of alice, the sender
+        bob (str): bitcoin address of bob, the receiver
+        rpconn (AuthServiceProxy): JSON-RPC connection
+            (:class:`AuthServiceProxy` instance) a local bitcoin regtest
+        transactions (Transactions): :class:`Transactions` instance to
+            communicate to the bitcoin regtest node
+
+    """
+    from spool import Spool
+    from spool.spoolex import BlockchainSpider
+    sender_password = uuid1().hex.encode('utf-8')
+    sender_wallet = BIP32Node.from_master_secret(sender_password,
+                                                 netcode='XTN')
+    sender_address = sender_wallet.bitcoin_address()
+    rpconn.importaddress(sender_address)
+    rpconn.sendtoaddress(sender_address, Spool.FEE/100000000)
+    rpconn.sendtoaddress(sender_address, Spool.TOKEN/100000000)
+    rpconn.sendtoaddress(sender_address, Spool.TOKEN/100000000)
+    rpconn.sendtoaddress(sender_address, Spool.TOKEN/100000000)
+    rpconn.generate(1)
+    receiver_address = rpconn.getnewaddress()
+    # TODO do not rely on Spool
+    txid = spool_regtest.transfer(
+        ('', sender_address),
+        receiver_address,
+        piece_hashes,
+        sender_password,
+        5,
+        min_confirmations=1,
+    )
+    verb = BlockchainSpider.check_script(transactions.get(txid)['vouts'])
+    assert verb == 'ASCRIBESPOOL01TRANSFER5'
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_check_script_with_invalid_tx(alice, bob, rpconn, transactions):
+    """
+    An invalid transaction in this context is one that does not contain a
+    ``vout`` for which the ``hex`` is a valid ``Spool`` verb.
+
+    Args;
+        alice (str): bitcoin address of alice, the sender
+        bob (str): bitcoin address of bob, the receiver
+        rpconn (AuthServiceProxy): JSON-RPC connection
+            (:class:`AuthServiceProxy` instance) a local bitcoin regtest
+        transactions (Transactions): :class:`Transactions` instance to
+            communicate to the bitcoin regtest node
+
+    """
+    from spool.spoolex import BlockchainSpider
+    rpconn.sendtoaddress(alice, 2)
+    rpconn.generate(1)
+    txid = rpconn.sendfrom('alice', bob, 1)
+    decoded_raw_transfer_tx = transactions.get(txid)
+    with pytest.raises(Exception) as exc:
+        BlockchainSpider.check_script(decoded_raw_transfer_tx['vouts'])
+    assert exc.value.message == 'Invalid ascribe transaction'
+
+
+@pytest.mark.usefixtures('init_blockchain')
 def test_get_addresses(rpconn, piece_hashes, spool_regtest, transactions):
     from spool import Spool
     from spool.spoolex import BlockchainSpider
