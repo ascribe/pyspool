@@ -21,14 +21,31 @@ class Ownership(object):
     Checks the actions that an address can make on a piece
     """
 
-    def __init__(self, address, piece_address, edition_number, testnet=False, service='blockr', username='', password='', host='', port=''):
+    def __init__(self, address, piece_address, edition_number, testnet=False,
+                 service='blockr', username='', password='', host='', port=''):
         """
+        Args:
+            address (str): bitcoin address to check ownership over
+                ``piece_address``
+            piece_address (str): bitcoin address of the piece to check
+            edition_number (int): the edition number of the piece
+            testnet (Optional[boo]l): whether to use the testnet (``True``)
+                or the mainnet (``False``). Defaults to ``False``.
+            service (Optional[str]): name of service to use to connect to the
+                bitcoin network. Possible names are
+                ``('blockr', 'daemon', 'regtest')``. Defaults to ``'blockr'``.
+            username (Optional[str]): username to connect to a bitcoin node
+                via json-rpc based services: ``('daemon', 'regtest')``
+            password (Optional[str]): password to connect to a bitcoin node
+                via json-rpc based services: ``('daemon', 'regtest')``
+            host (Optional[str]): host of the bitcoin node to connect to
+                via json-rpc based services: ``('daemon', 'regtest')``
+            port (Optional[str]): port of the bitcoin node to connect to
+                via json-rpc based services: ``('daemon', 'regtest')``
 
-        :param address: bitcoin address to check ownership over piece_address
-        :param piece_address: bitcoin address of the piece to check
-        :param edition_number: the edition number of the piece
-        :param testnet: testnet flag. Defaults to false
-        :return: returns an instance of the Ownserhip class
+        Returns:
+            instance of the :class:`Ownership` class
+
         """
         self.address = address
         self.piece_address = piece_address

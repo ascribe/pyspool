@@ -62,3 +62,64 @@ class TestOwnership(unittest.TestCase):
         self.assertFalse(ow.can_transfer)
         self.assertFalse(ow.can_consign)
         self.assertFalse(ow.can_loan)
+
+
+def test_ownership_init(alice, registered_piece_hashes,
+                        rpcuser, rpcpassword, host, port):
+    from spool import Ownership
+    piece_address = registered_piece_hashes[0]
+    ownership = Ownership(
+        alice,
+        piece_address,
+        0,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert ownership.address == alice
+    assert ownership.piece_address == piece_address
+    assert ownership.edition_number == 0
+    assert ownership.testnet is True
+    assert ownership.reason == ''
+
+
+def test_can_register_master_true(alice, piece_hashes, rpcuser,
+                                  rpcpassword, host, port):
+    from spool import Ownership
+    piece_address = piece_hashes[0]
+    ownership = Ownership(
+        alice,
+        piece_address,
+        0,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert ownership.can_register_master
+    assert ownership.reason == ''
+
+
+def test_can_register_master_false(alice, registered_piece_hashes,
+                                   rpcuser, rpcpassword, host, port):
+    from spool import Ownership
+    piece_address = registered_piece_hashes[0]
+    ownership = Ownership(
+        alice,
+        piece_address,
+        0,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_register_master
+    assert (ownership.reason ==
+            'Master piece already registered in the blockchain')
