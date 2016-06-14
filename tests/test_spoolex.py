@@ -73,14 +73,14 @@ def test_check_script(rpconn, piece_hashes, spool_regtest, transactions):
 
 
 @pytest.mark.usefixtures('init_blockchain')
-def test_check_script_with_invalid_tx(bob, carol, rpconn, transactions):
+def test_check_script_with_invalid_tx(eve, wendy, rpconn, transactions):
     """
     An invalid transaction in this context is one that does not contain a
     ``vout`` for which the ``hex`` is a valid ``Spool`` verb.
 
     Args;
-        carol (str): bitcoin address of carol, the sender
-        bob (str): bitcoin address of bob, the receiver
+        eve (str): bitcoin address of eve, the sender
+        wendy (str): bitcoin address of wendy, the receiver
         rpconn (AuthServiceProxy): JSON-RPC connection
             (:class:`AuthServiceProxy` instance) a local bitcoin regtest
         transactions (Transactions): :class:`Transactions` instance to
@@ -88,9 +88,9 @@ def test_check_script_with_invalid_tx(bob, carol, rpconn, transactions):
 
     """
     from spool.spoolex import BlockchainSpider
-    rpconn.sendtoaddress(carol, 2)
+    rpconn.sendtoaddress(eve, 2)
     rpconn.generate(1)
-    txid = rpconn.sendfrom('carol', bob, 1)
+    txid = rpconn.sendfrom('eve', wendy, 1)
     decoded_raw_transfer_tx = transactions.get(txid)
     with pytest.raises(Exception) as exc:
         BlockchainSpider.check_script(decoded_raw_transfer_tx['vouts'])
@@ -130,14 +130,14 @@ def test_get_addresses(rpconn, piece_hashes, spool_regtest, transactions):
 
 
 @pytest.mark.usefixtures('init_blockchain')
-def test_get_addresses_with_invalid_tx(bob, carol, rpconn, transactions):
+def test_get_addresses_with_invalid_tx(eve, wendy, rpconn, transactions):
     """
     An invalid transaction in this context is one that has inputs from
     different addresses.
 
     Args;
-        carol (str): bitcoin address of carol, the sender
-        bob (str): bitcoin address of bob, the receiver
+        eve (str): bitcoin address of eve, the sender
+        wendy (str): bitcoin address of wendy, the receiver
         rpconn (AuthServiceProxy): JSON-RPC connection
             (:class:`AuthServiceProxy` instance) a local bitcoin regtest
         transactions (Transactions): :class:`Transactions` instance to
@@ -145,10 +145,10 @@ def test_get_addresses_with_invalid_tx(bob, carol, rpconn, transactions):
 
     """
     from spool.spoolex import BlockchainSpider, InvalidTransactionError
-    rpconn.sendtoaddress(bob, 1)
-    rpconn.sendtoaddress(bob, 1)
+    rpconn.sendtoaddress(eve, 1)
+    rpconn.sendtoaddress(eve, 1)
     rpconn.generate(1)
-    txid = rpconn.sendfrom('bob', carol, 2)
+    txid = rpconn.sendfrom('eve', wendy, 2)
     decoded_raw_transfer_tx = transactions.get(txid)
     with pytest.raises(InvalidTransactionError) as exc:
         BlockchainSpider._get_addresses(decoded_raw_transfer_tx)
@@ -298,23 +298,66 @@ def test_transfer_history(federation, alice, bob, spool_regtest, spider,
     assert transfer_data['verb'] == 'ASCRIBESPOOL01TRANSFER2'
 
 
-def test_chain(transferred_edition_two_hashes, spider):
+def test_loan_history(federation, bob, carol, spool_regtest, spider,
+                      transferred_edition_two_hashes, rpconn):
+    from conftest import reload_address
+    edition_number = 2
+    loan_start, loan_end = '171017', '181018'
+    piece_hash = transferred_edition_two_hashes[0]
+    reload_address(bob, rpconn)
+    txid = spool_regtest.loan(
+        ('', bob),
+        carol,
+        transferred_edition_two_hashes,
+        b'bob-secret',
+        2,
+        loan_start,
+        loan_end,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    history = spider.history(piece_hash)
+    assert len(history) == 3
+    assert '' in history
+    assert 0 in history
+    assert edition_number in history
+    assert len(history['']) == 1
+    assert len(history[0]) == 1
+    assert len(history[edition_number]) == 3
+    loan_data = history[edition_number][2]
+    assert loan_data['action'] == 'LOAN'
+    assert loan_data['edition_number'] == edition_number
+    assert loan_data['from_address'] == bob
+    assert loan_data['number_editions'] == 3
+    assert loan_data['piece_address'] == piece_hash
+    assert loan_data['timestamp_utc']
+    assert loan_data['to_address'] == carol
+    assert loan_data['txid'] == txid
+    assert loan_data['verb'] == 'ASCRIBESPOOL01LOAN2/171017181018'
+
+
+def test_chain(loaned_edition_two_hashes, spider):
     from spool import BlockchainSpider
-    history = spider.history(transferred_edition_two_hashes[0])
+    history = spider.history(loaned_edition_two_hashes[0])
     chain = BlockchainSpider.chain(history, 2)
-    assert len(chain) == 2
+    assert len(chain) == 3
     assert chain[0]['action'] == 'REGISTER'
     assert chain[1]['action'] == 'TRANSFER'
+    assert chain[2]['action'] == 'LOAN'
     assert chain[0]['edition_number'] == 2
     assert chain[1]['edition_number'] == 2
+    assert chain[2]['edition_number'] == 2
 
 
-def test_strip_loan(transferred_edition_two_hashes, spider):
+def test_strip_loan(loaned_edition_two_hashes, spider):
     from spool import BlockchainSpider
-    history = spider.history(transferred_edition_two_hashes[0])
+    history = spider.history(loaned_edition_two_hashes[0])
     chain = BlockchainSpider.chain(history, 2)
+    assert len(chain) == 3
+    assert 'LOAN' in (tx['action'] for tx in chain)
     chain = BlockchainSpider.strip_loan(chain)
-    assert chain
+    assert len(chain) == 2
+    assert 'LOAN' not in (tx['action'] for tx in chain)
 
 
 def test_pprint(transferred_edition_two_hashes, spider):

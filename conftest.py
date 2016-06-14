@@ -49,20 +49,6 @@ def alice(alice_hd_address, rpconn, request):
 
 
 @pytest.fixture
-def bob(rpconn, request):
-    address = rpconn.getnewaddress()
-    rpconn.setaccount(address, request.fixturename)
-    return address
-
-
-@pytest.fixture
-def carol(rpconn, request):
-    address = rpconn.getnewaddress()
-    rpconn.setaccount(address, request.fixturename)
-    return address
-
-
-@pytest.fixture
 def bob_hd_wallet():
     return BIP32Node.from_master_secret(b'bob-secret', netcode='XTN')
 
@@ -70,6 +56,44 @@ def bob_hd_wallet():
 @pytest.fixture
 def bob_hd_address(bob_hd_wallet):
     return bob_hd_wallet.bitcoin_address()
+
+
+@pytest.fixture
+def bob(bob_hd_address, rpconn, request):
+    rpconn.importaddress(bob_hd_address)
+    rpconn.setaccount(bob_hd_address, request.fixturename)
+    return bob_hd_address
+
+
+@pytest.fixture
+def carol_hd_wallet():
+    return BIP32Node.from_master_secret(b'carol-secret', netcode='XTN')
+
+
+@pytest.fixture
+def carol_hd_address(carol_hd_wallet):
+    return carol_hd_wallet.bitcoin_address()
+
+
+@pytest.fixture
+def carol(carol_hd_address, rpconn, request):
+    rpconn.importaddress(carol_hd_address)
+    rpconn.setaccount(carol_hd_address, request.fixturename)
+    return carol_hd_address
+
+
+@pytest.fixture
+def eve(rpconn, request):
+    address = rpconn.getnewaddress()
+    rpconn.setaccount(address, request.fixturename)
+    return address
+
+
+@pytest.fixture
+def wendy(rpconn, request):
+    address = rpconn.getnewaddress()
+    rpconn.setaccount(address, request.fixturename)
+    return address
 
 
 @pytest.fixture
@@ -300,3 +324,32 @@ def transferred_edition_two_hashes(federation, alice, bob, spool_regtest,
     )
     rpconn.generate(1)
     return registered_edition_two_hashes
+
+
+@pytest.fixture
+def loan_start():
+    return '171017'
+
+
+@pytest.fixture
+def loan_end():
+    return '181018'
+
+
+@pytest.fixture
+def loaned_edition_two_hashes(federation, bob, carol, spool_regtest,
+                              transferred_edition_two_hashes, rpconn,
+                              loan_start, loan_end):
+    reload_address(bob, rpconn)
+    spool_regtest.loan(
+        ('', bob),
+        carol,
+        transferred_edition_two_hashes,
+        b'bob-secret',
+        2,
+        loan_start,
+        loan_end,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    return transferred_edition_two_hashes
