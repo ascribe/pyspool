@@ -41,7 +41,7 @@ def test_check_script(rpconn, piece_hashes, spool_regtest, transactions):
         alice (str): bitcoin address of alice, the sender
         bob (str): bitcoin address of bob, the receiver
         rpconn (AuthServiceProxy): JSON-RPC connection
-            (:class:`AuthServiceProxy` instance) a local bitcoin regtest
+            (:class:`AuthServiceProxy` instance) to bitcoin regtest
         transactions (Transactions): :class:`Transactions` instance to
             communicate to the bitcoin regtest node
 
@@ -73,13 +73,13 @@ def test_check_script(rpconn, piece_hashes, spool_regtest, transactions):
 
 
 @pytest.mark.usefixtures('init_blockchain')
-def test_check_script_with_invalid_tx(alice, bob, rpconn, transactions):
+def test_check_script_with_invalid_tx(bob, carol, rpconn, transactions):
     """
     An invalid transaction in this context is one that does not contain a
     ``vout`` for which the ``hex`` is a valid ``Spool`` verb.
 
     Args;
-        alice (str): bitcoin address of alice, the sender
+        carol (str): bitcoin address of carol, the sender
         bob (str): bitcoin address of bob, the receiver
         rpconn (AuthServiceProxy): JSON-RPC connection
             (:class:`AuthServiceProxy` instance) a local bitcoin regtest
@@ -88,9 +88,9 @@ def test_check_script_with_invalid_tx(alice, bob, rpconn, transactions):
 
     """
     from spool.spoolex import BlockchainSpider
-    rpconn.sendtoaddress(alice, 2)
+    rpconn.sendtoaddress(carol, 2)
     rpconn.generate(1)
-    txid = rpconn.sendfrom('alice', bob, 1)
+    txid = rpconn.sendfrom('carol', bob, 1)
     decoded_raw_transfer_tx = transactions.get(txid)
     with pytest.raises(Exception) as exc:
         BlockchainSpider.check_script(decoded_raw_transfer_tx['vouts'])
@@ -130,13 +130,13 @@ def test_get_addresses(rpconn, piece_hashes, spool_regtest, transactions):
 
 
 @pytest.mark.usefixtures('init_blockchain')
-def test_get_addresses_with_invalid_tx(alice, bob, rpconn, transactions):
+def test_get_addresses_with_invalid_tx(bob, carol, rpconn, transactions):
     """
     An invalid transaction in this context is one that has inputs from
     different addresses.
 
     Args;
-        alice (str): bitcoin address of alice, the sender
+        carol (str): bitcoin address of carol, the sender
         bob (str): bitcoin address of bob, the receiver
         rpconn (AuthServiceProxy): JSON-RPC connection
             (:class:`AuthServiceProxy` instance) a local bitcoin regtest
@@ -145,10 +145,10 @@ def test_get_addresses_with_invalid_tx(alice, bob, rpconn, transactions):
 
     """
     from spool.spoolex import BlockchainSpider, InvalidTransactionError
-    rpconn.sendtoaddress(alice, 1)
-    rpconn.sendtoaddress(alice, 1)
+    rpconn.sendtoaddress(bob, 1)
+    rpconn.sendtoaddress(bob, 1)
     rpconn.generate(1)
-    txid = rpconn.sendfrom('alice', bob, 2)
+    txid = rpconn.sendfrom('bob', carol, 2)
     decoded_raw_transfer_tx = transactions.get(txid)
     with pytest.raises(InvalidTransactionError) as exc:
         BlockchainSpider._get_addresses(decoded_raw_transfer_tx)
@@ -169,3 +169,130 @@ def test_get_time_utc():
     assert timestamp
     assert datetime.fromtimestamp(timestamp,
                                   tz=pytz.UTC).strftime(TIME_FORMAT) == time
+
+
+def test_simplest_history(federation, alice, piece_hashes,
+                          spool_regtest, spider, rpconn):
+    txid = spool_regtest.register_piece(
+        ('', federation),
+        alice,
+        piece_hashes,
+        b'federation-secret',
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    history = spider.history(piece_hashes[0])
+    assert len(history) == 1
+    assert '' in history
+    assert len(history['']) == 1
+    piece_registration_data = history[''][0]
+    assert piece_registration_data['action'] == 'PIECE'
+    assert piece_registration_data['edition_number'] == ''
+    assert piece_registration_data['from_address'] == federation
+    assert piece_registration_data['number_editions'] == 0
+    assert piece_registration_data['piece_address'] == piece_hashes[0]
+    assert piece_registration_data['timestamp_utc']
+    assert piece_registration_data['to_address'] == alice
+    assert piece_registration_data['txid'] == txid
+    assert piece_registration_data['verb'] == 'ASCRIBESPOOL01PIECE'
+
+
+def test_register_editions_qty_history(federation,
+                                       alice,
+                                       registered_piece_hashes,
+                                       spool_regtest,
+                                       spider,
+                                       rpconn):
+    txid = spool_regtest.editions(
+        ('', federation),
+        alice,
+        registered_piece_hashes,
+        b'federation-secret',
+        3,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    history = spider.history(registered_piece_hashes[0])
+    assert len(history) == 2
+    assert '' in history
+    assert 0 in history
+    assert len(history['']) == 1
+    assert len(history[0]) == 1
+    editions_data = history[0][0]
+    assert editions_data['action'] == 'EDITIONS'
+    assert editions_data['edition_number'] == 0
+    assert editions_data['from_address'] == federation
+    assert editions_data['number_editions'] == 3
+    assert editions_data['piece_address'] == registered_piece_hashes[0]
+    assert editions_data['timestamp_utc']
+    assert editions_data['to_address'] == alice
+    assert editions_data['txid'] == txid
+    assert editions_data['verb'] == 'ASCRIBESPOOL01EDITIONS3'
+
+
+def test_register_edition_history(federation, alice, spool_regtest, spider,
+                                  registered_edition_qty_hashes, rpconn):
+    edition_number = 2
+    piece_hash = registered_edition_qty_hashes[0]
+    txid = spool_regtest.register(
+        ('', federation),
+        alice,
+        registered_edition_qty_hashes,
+        b'federation-secret',
+        edition_number,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    history = spider.history(piece_hash)
+    assert len(history) == 3
+    assert '' in history
+    assert 0 in history
+    assert edition_number in history
+    assert len(history['']) == 1
+    assert len(history[0]) == 1
+    assert len(history[edition_number]) == 1
+    edition_registration_data = history[edition_number][0]
+    assert edition_registration_data['action'] == 'REGISTER'
+    assert edition_registration_data['edition_number'] == edition_number
+    assert edition_registration_data['from_address'] == federation
+    assert edition_registration_data['number_editions'] == 3
+    assert edition_registration_data['piece_address'] == piece_hash
+    assert edition_registration_data['timestamp_utc']
+    assert edition_registration_data['to_address'] == alice
+    assert edition_registration_data['txid'] == txid
+    assert edition_registration_data['verb'] == 'ASCRIBESPOOL01REGISTER2'
+
+
+def test_transfer_history(federation, alice, bob, spool_regtest, spider,
+                          registered_edition_two_hashes, rpconn):
+    from conftest import reload_address
+    reload_address(alice, rpconn)
+    edition_number = 2
+    piece_hash = registered_edition_two_hashes[0]
+    txid = spool_regtest.transfer(
+        ('', alice),
+        bob,
+        registered_edition_two_hashes,
+        b'alice-secret',
+        edition_number,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    history = spider.history(piece_hash)
+    assert len(history) == 3
+    assert '' in history
+    assert 0 in history
+    assert edition_number in history
+    assert len(history['']) == 1
+    assert len(history[0]) == 1
+    assert len(history[edition_number]) == 2
+    transfer_data = history[edition_number][1]
+    assert transfer_data['action'] == 'TRANSFER'
+    assert transfer_data['edition_number'] == edition_number
+    assert transfer_data['from_address'] == alice
+    assert transfer_data['number_editions'] == 3
+    assert transfer_data['piece_address'] == piece_hash
+    assert transfer_data['timestamp_utc']
+    assert transfer_data['to_address'] == bob
+    assert transfer_data['txid'] == txid
+    assert transfer_data['verb'] == 'ASCRIBESPOOL01TRANSFER2'

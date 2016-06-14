@@ -14,7 +14,7 @@ before_install:
   - sudo apt-add-repository -y ppa:bitcoin/bitcoin
   - sudo apt-get -q update
   - sudo apt-get install -y bitcoind
-  - bitcoind -daemon -regtest -rpcuser=electron -rpcpassword=neutrino
+  - bitcoind -daemon -regtest -rpcuser=electron -rpcpassword=neutrino -txindex=1
 
 script: py.test -v --cov
 

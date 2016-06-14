@@ -49,13 +49,19 @@ class BlockchainSpider(object):
 
     def history(self, hash):
         """
-        Retrieve the ownership tree of all editions of a piece given the hash
+        Retrieve the ownership tree of all editions of a piece given the hash.
 
-        :param hash: Hash of the file to check. Can be created with the File class
-        :return: ownsership tree of all editions of a piece
+        Args:
+            hash (str): Hash of the file to check. Can be created with the
+                :class:`File` class
+
+        Returns:
+            ownsership tree of all editions of a piece
+
+        .. note:: For now we only support searching the blockchain by
+            the piece hash.
+
         """
-
-        # For now we only support searching the blockchain by the piece hash
         txs = self._t.get(hash, max_transactions=10000)['transactions']
         tree = defaultdict(list)
         number_editions = 0

@@ -12,11 +12,40 @@ from pycoin.key.BIP32Node import BIP32Node
 from transactions import Transactions
 
 
+def reload_address(address, rpconn, times=1):
+    """
+    Sends necessary satoshis for a Spool transaction.
+
+    Args:
+        address (str): receiving bitcoin address
+        rpconn (AuthServiceProxy): JSON-RPC connection
+            (:class:`AuthServiceProxy` instance) to bitcoin regtest
+
+    """
+    from spool import Spool
+    for _ in range(times):
+        rpconn.sendtoaddress(address, Spool.FEE/100000000)
+        rpconn.sendtoaddress(address, Spool.TOKEN/100000000)
+        rpconn.sendtoaddress(address, Spool.TOKEN/100000000)
+        rpconn.sendtoaddress(address, Spool.TOKEN/100000000)
+    rpconn.generate(1)
+
+
 @pytest.fixture
-def alice(rpconn, request):
-    address = rpconn.getnewaddress()
-    rpconn.setaccount(address, request.fixturename)
-    return address
+def alice_hd_wallet():
+    return BIP32Node.from_master_secret(b'alice-secret', netcode='XTN')
+
+
+@pytest.fixture
+def alice_hd_address(alice_hd_wallet):
+    return alice_hd_wallet.bitcoin_address()
+
+
+@pytest.fixture
+def alice(alice_hd_address, rpconn, request):
+    rpconn.importaddress(alice_hd_address)
+    rpconn.setaccount(alice_hd_address, request.fixturename)
+    return alice_hd_address
 
 
 @pytest.fixture
@@ -27,8 +56,10 @@ def bob(rpconn, request):
 
 
 @pytest.fixture
-def alice_hd_wallet():
-    return BIP32Node.from_master_secret(b'alice-secret', netcode='XTN')
+def carol(rpconn, request):
+    address = rpconn.getnewaddress()
+    rpconn.setaccount(address, request.fixturename)
+    return address
 
 
 @pytest.fixture
@@ -37,29 +68,32 @@ def bob_hd_wallet():
 
 
 @pytest.fixture
+def bob_hd_address(bob_hd_wallet):
+    return bob_hd_wallet.bitcoin_address()
+
+
+@pytest.fixture
 def federation_hd_wallet(request):
     return BIP32Node.from_master_secret(b'federation-secret', netcode='XTN')
+
+
+@pytest.fixture
+def federation_hd_address(federation_hd_wallet):
+    return federation_hd_wallet.bitcoin_address()
+
+
+@pytest.fixture
+def federation(federation_hd_address, init_blockchain, rpconn):
+    from spool import Spool
+    rpconn.importaddress(federation_hd_address)
+    reload_address(federation_hd_address, rpconn)
+    return federation_hd_address
 
 
 @pytest.fixture
 def random_bip32_wallet():
     return BIP32Node.from_master_secret(
         uuid1().hex.encode('utf-8'), netcode='XTN')
-
-
-@pytest.fixture
-def alice_hd_address(alice_hd_wallet):
-    return alice_hd_wallet.bitcoin_address()
-
-
-@pytest.fixture
-def bob_hd_address(bob_hd_wallet):
-    return bob_hd_wallet.bitcoin_address()
-
-
-@pytest.fixture
-def federation_hd_address(federation_hd_wallet):
-    return federation_hd_wallet.bitcoin_address()
 
 
 @pytest.fixture
@@ -128,8 +162,21 @@ def spool_regtest(rpcuser, rpcpassword, host, port):
 
 
 @pytest.fixture
-def transactions(rpcuser, rpcpassword, host, port, rpcurl):
+def transactions(rpcuser, rpcpassword, host, port):
     return Transactions(
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+        testnet=True,
+    )
+
+
+@pytest.fixture
+def spider(rpcuser, rpcpassword, host, port):
+    from spool import BlockchainSpider
+    return BlockchainSpider(
         service='daemon',
         username=rpcuser,
         password=rpcpassword,
@@ -191,3 +238,51 @@ def decoded_raw_transfer_tx(rpconn, piece_hashes, spool_regtest, transactions):
         min_confirmations=1,
     )
     return transactions.get(txid)
+
+
+@pytest.fixture
+def registered_piece_hashes(federation, alice,
+                            piece_hashes, spool_regtest, rpconn):
+    spool_regtest.register_piece(
+        ('', federation),
+        alice,
+        piece_hashes,
+        b'federation-secret',
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    reload_address(federation, rpconn)
+    return piece_hashes
+
+
+@pytest.fixture
+def registered_edition_qty_hashes(federation, alice, registered_piece_hashes,
+                                  spool_regtest, rpconn):
+    spool_regtest.editions(
+        ('', federation),
+        alice,
+        registered_piece_hashes,
+        b'federation-secret',
+        3,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    reload_address(federation, rpconn)
+    return registered_piece_hashes
+
+
+@pytest.fixture
+def registered_edition_two_hashes(federation, alice, spool_regtest, rpconn,
+                                  registered_edition_qty_hashes):
+    spool_regtest.register(
+        ('', federation),
+        alice,
+        registered_edition_qty_hashes,
+        b'federation-secret',
+        2,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    reload_address(federation, rpconn)
+    return registered_edition_qty_hashes
+
