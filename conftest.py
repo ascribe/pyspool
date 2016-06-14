@@ -84,7 +84,6 @@ def federation_hd_address(federation_hd_wallet):
 
 @pytest.fixture
 def federation(federation_hd_address, init_blockchain, rpconn):
-    from spool import Spool
     rpconn.importaddress(federation_hd_address)
     reload_address(federation_hd_address, rpconn)
     return federation_hd_address
@@ -286,3 +285,18 @@ def registered_edition_two_hashes(federation, alice, spool_regtest, rpconn,
     reload_address(federation, rpconn)
     return registered_edition_qty_hashes
 
+
+@pytest.fixture
+def transferred_edition_two_hashes(federation, alice, bob, spool_regtest,
+                                   registered_edition_two_hashes, rpconn):
+    reload_address(alice, rpconn)
+    spool_regtest.transfer(
+        ('', alice),
+        bob,
+        registered_edition_two_hashes,
+        b'alice-secret',
+        2,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    return registered_edition_two_hashes

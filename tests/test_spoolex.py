@@ -296,3 +296,28 @@ def test_transfer_history(federation, alice, bob, spool_regtest, spider,
     assert transfer_data['to_address'] == bob
     assert transfer_data['txid'] == txid
     assert transfer_data['verb'] == 'ASCRIBESPOOL01TRANSFER2'
+
+
+def test_chain(transferred_edition_two_hashes, spider):
+    from spool import BlockchainSpider
+    history = spider.history(transferred_edition_two_hashes[0])
+    chain = BlockchainSpider.chain(history, 2)
+    assert len(chain) == 2
+    assert chain[0]['action'] == 'REGISTER'
+    assert chain[1]['action'] == 'TRANSFER'
+    assert chain[0]['edition_number'] == 2
+    assert chain[1]['edition_number'] == 2
+
+
+def test_strip_loan(transferred_edition_two_hashes, spider):
+    from spool import BlockchainSpider
+    history = spider.history(transferred_edition_two_hashes[0])
+    chain = BlockchainSpider.chain(history, 2)
+    chain = BlockchainSpider.strip_loan(chain)
+    assert chain
+
+
+def test_pprint(transferred_edition_two_hashes, spider):
+    from spool import BlockchainSpider
+    history = spider.history(transferred_edition_two_hashes[0])
+    BlockchainSpider.pprint(history)
