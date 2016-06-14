@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 
+from uuid import uuid1
 from datetime import datetime
 
+import pytest
 import pytz
 
+from pycoin.key.BIP32Node import BIP32Node
 from transactions import Transactions
 from transactions.services.daemonservice import BitcoinDaemonService
 
@@ -27,6 +30,64 @@ def test_blockchainspider_init(rpcuser, rpcpassword, host, port):
     assert blockchain_spider._t._service._host == host
     assert blockchain_spider._t._service._port == port
     assert isinstance(blockchain_spider._t._service, BitcoinDaemonService)
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_get_addresses(rpconn, piece_hashes, spool_regtest, transactions):
+    from spool import Spool
+    from spool.spoolex import BlockchainSpider
+    sender_password = uuid1().hex.encode('utf-8')
+    sender_wallet = BIP32Node.from_master_secret(sender_password,
+                                                 netcode='XTN')
+    sender_address = sender_wallet.bitcoin_address()
+    rpconn.importaddress(sender_address)
+    rpconn.sendtoaddress(sender_address, Spool.FEE/100000000)
+    rpconn.sendtoaddress(sender_address, Spool.TOKEN/100000000)
+    rpconn.sendtoaddress(sender_address, Spool.TOKEN/100000000)
+    rpconn.sendtoaddress(sender_address, Spool.TOKEN/100000000)
+    rpconn.generate(1)
+    receiver_address = rpconn.getnewaddress()
+    # TODO do not rely on Spool
+    txid = spool_regtest.transfer(
+        ('', sender_address),
+        receiver_address,
+        piece_hashes,
+        sender_password,
+        5,
+        min_confirmations=1,
+    )
+    decoded_raw_transfer_tx = transactions.get(txid)
+    addresses = BlockchainSpider._get_addresses(decoded_raw_transfer_tx)
+    assert len(addresses) == 3
+    assert addresses[0] == sender_address
+    assert addresses[1] == receiver_address
+    assert addresses[2] == piece_hashes[0]
+
+
+@pytest.mark.usefixtures('init_blockchain')
+def test_get_addresses_with_invalid_tx(alice, bob, rpconn, transactions):
+    """
+    An invalid transaction in this context is one that has inputs from
+    different addresses.
+
+    Args;
+        alice (str): bitcoin address of alice, the sender
+        bob (str): bitcoin address of bob, the receiver
+        rpconn (AuthServiceProxy): JSON-RPC connection
+            (:class:`AuthServiceProxy` instance) a local bitcoin regtest
+        transactions (Transactions): :class:`Transactions` instance to
+            communicate to the bitcoin regtest node
+
+    """
+    from spool.spoolex import BlockchainSpider, InvalidTransactionError
+    rpconn.sendtoaddress(alice, 1)
+    rpconn.sendtoaddress(alice, 1)
+    rpconn.generate(1)
+    txid = rpconn.sendfrom('alice', bob, 2)
+    decoded_raw_transfer_tx = transactions.get(txid)
+    with pytest.raises(InvalidTransactionError) as exc:
+        BlockchainSpider._get_addresses(decoded_raw_transfer_tx)
+    assert isinstance(exc.value, InvalidTransactionError)
 
 
 def test_decode_op_return():
