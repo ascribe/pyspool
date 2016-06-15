@@ -3,6 +3,9 @@ from exceptions import Exception
 from spoolex import BlockchainSpider
 
 
+REGISTERED_PIECE_CODE = ''
+
+
 class OwnershipError(Exception):
 
     """
@@ -109,7 +112,7 @@ class Ownership(object):
         # 4. TODO The root address owns the piece
         #    right now we cannot do this because we only receive the leaf address
         #    when registering an edition
-        chain = BlockchainSpider.chain(self._tree, 0)
+        chain = BlockchainSpider.chain(self._tree, REGISTERED_PIECE_CODE)
 
         # edition 0 should only have two transactions: REGISTER and EDITIONS
         if len(chain) == 0:
@@ -149,7 +152,7 @@ class Ownership(object):
         # 1. There needs to a least one transaction for the piece_address (the registration of the master edition)
         # 2. a piece with address piece_address needs to be registered with ASCRIBESPOOL01REGISTER0 (master edition)
         # 3. the number of editions should have not been set yet (no tx with verb ASCRIBESPOOLEDITIONS)
-        chain = BlockchainSpider.chain(self._tree, 0)
+        chain = BlockchainSpider.chain(self._tree, REGISTERED_PIECE_CODE)
 
         if len(chain) == 0:
             self.reason = 'Master edition not yet registered'

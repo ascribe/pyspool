@@ -66,12 +66,12 @@ class TestOwnership(unittest.TestCase):
 
 def test_ownership_init(alice, registered_piece_hashes,
                         rpcuser, rpcpassword, host, port):
-    from spool import Ownership
+    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
     piece_address = registered_piece_hashes[0]
     ownership = Ownership(
         alice,
         piece_address,
-        0,
+        REGISTERED_PIECE_CODE,
         testnet=True,
         service='daemon',
         username=rpcuser,
@@ -81,19 +81,19 @@ def test_ownership_init(alice, registered_piece_hashes,
     )
     assert ownership.address == alice
     assert ownership.piece_address == piece_address
-    assert ownership.edition_number == 0
+    assert ownership.edition_number == REGISTERED_PIECE_CODE
     assert ownership.testnet is True
     assert ownership.reason == ''
 
 
 def test_can_register_master_true(alice, piece_hashes, rpcuser,
                                   rpcpassword, host, port):
-    from spool import Ownership
+    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
     piece_address = piece_hashes[0]
     ownership = Ownership(
         alice,
         piece_address,
-        0,
+        REGISTERED_PIECE_CODE,
         testnet=True,
         service='daemon',
         username=rpcuser,
@@ -107,12 +107,12 @@ def test_can_register_master_true(alice, piece_hashes, rpcuser,
 
 def test_can_register_master_false(alice, registered_piece_hashes,
                                    rpcuser, rpcpassword, host, port):
-    from spool import Ownership
+    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
     piece_address = registered_piece_hashes[0]
     ownership = Ownership(
         alice,
         piece_address,
-        0,
+        REGISTERED_PIECE_CODE,
         testnet=True,
         service='daemon',
         username=rpcuser,
@@ -123,3 +123,65 @@ def test_can_register_master_false(alice, registered_piece_hashes,
     assert not ownership.can_register_master
     assert (ownership.reason ==
             'Master piece already registered in the blockchain')
+
+
+def test_can_editions(alice, registered_piece_hashes,
+                      rpcuser, rpcpassword, host, port):
+    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
+    piece_address = registered_piece_hashes[0]
+    ownership = Ownership(
+        alice,
+        piece_address,
+        REGISTERED_PIECE_CODE,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert ownership.can_editions
+    assert ownership.reason == ''
+
+
+def test_can_editions_not_registered_piece(alice, piece_hashes, rpcuser,
+                                           rpcpassword, host, port):
+    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
+    piece_address = piece_hashes[0]
+    ownership = Ownership(
+        alice,
+        piece_address,
+        REGISTERED_PIECE_CODE,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_editions
+    assert ownership.reason == 'Master edition not yet registered'
+
+
+def test_can_editions_registered_edition_qty(alice,
+                                             rpcuser,
+                                             rpcpassword,
+                                             host,
+                                             port,
+                                             registered_edition_qty_hashes):
+    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
+    piece_address = registered_edition_qty_hashes[0]
+    ownership = Ownership(
+        alice,
+        piece_address,
+        REGISTERED_PIECE_CODE,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_editions
+    assert (ownership.reason ==
+            'Number of editions was already registered for this piece')
