@@ -284,8 +284,12 @@ def test_can_register_registered_edition(alice,
             'Edition number 2 is already registered in the blockchain')
 
 
-def test_can_register_edition(alice, rpcuser, rpcpassword,
-                              host, port, registered_edition_qty_hashes):
+def test_can_register_non_existing_edition(alice,
+                                           rpcuser,
+                                           rpcpassword,
+                                           host,
+                                           port,
+                                           registered_edition_qty_hashes):
     from spool.ownership import Ownership
     piece_address = registered_edition_qty_hashes[0]
     edition_number = 4
