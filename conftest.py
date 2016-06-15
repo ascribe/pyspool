@@ -295,6 +295,22 @@ def registered_edition_qty_hashes(federation, alice, registered_piece_hashes,
 
 
 @pytest.fixture
+def registered_edition_one_hashes(federation, alice, spool_regtest, rpconn,
+                                  registered_edition_qty_hashes):
+    spool_regtest.register(
+        ('', federation),
+        alice,
+        registered_edition_qty_hashes,
+        b'federation-secret',
+        1,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    reload_address(federation, rpconn)
+    return registered_edition_qty_hashes
+
+
+@pytest.fixture
 def registered_edition_two_hashes(federation, alice, spool_regtest, rpconn,
                                   registered_edition_qty_hashes):
     spool_regtest.register(
@@ -334,6 +350,44 @@ def loan_start():
 @pytest.fixture
 def loan_end():
     return '181018'
+
+
+@pytest.fixture
+def loaned_piece_hashes(federation, alice, carol, spool_regtest,
+                        registered_piece_hashes, rpconn,
+                        loan_start, loan_end):
+    reload_address(alice, rpconn)
+    spool_regtest.loan(
+        ('', alice),
+        carol,
+        registered_piece_hashes,
+        b'alice-secret',
+        0,
+        loan_start,
+        loan_end,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    return registered_piece_hashes
+
+
+@pytest.fixture
+def loaned_edition_one_hashes(federation, alice, carol, spool_regtest,
+                              registered_edition_one_hashes, rpconn,
+                              loan_start, loan_end):
+    reload_address(alice, rpconn)
+    spool_regtest.loan(
+        ('', alice),
+        carol,
+        registered_edition_one_hashes,
+        b'alice-secret',
+        1,
+        loan_start,
+        loan_end,
+        min_confirmations=1,
+    )
+    rpconn.generate(1)
+    return registered_edition_one_hashes
 
 
 @pytest.fixture

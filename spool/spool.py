@@ -310,7 +310,7 @@ class Spool(object):
             to_address (str): Address to loan the edition to
             hash (Tuple[str]): Hash of the piece. Tuple (file_hash, file_hash_metadata)
             password (str): Password for the wallet currently holding the edition. For signing the transaction
-            edition_num (int): the number of the edition to unconsign
+            edition_num (int): the number of the edition to loan
             loan_start (str): Start date for the loan. In the form YYMMDD
             loan_end (str): End date for the loan. In the form YYMMDD
             min_confirmations (int): Number of confirmations when chosing the inputs of the transaction. Defaults to 6

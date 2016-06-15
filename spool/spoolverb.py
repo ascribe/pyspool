@@ -64,7 +64,11 @@ class Spoolverb(object):
             num_editions = data['arg1']
             return cls(meta=meta, version=version, action=action, num_editions=int(num_editions))
         elif action == 'LOAN':
-            edition_num = data['arg1']
+            # TODO Review. Workaround for piece loans
+            try:
+                edition_num = int(data['arg1'])
+            except TypeError:
+                edition_num = 0
             loan_start = data['arg2'][:6]
             loan_end = data['arg2'][6:]
             return cls(meta=meta, version=version, action=action, edition_num=int(edition_num),

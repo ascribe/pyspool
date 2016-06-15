@@ -130,7 +130,7 @@ class Ownership(object):
             return False
 
         if self.edition_number in self._tree:
-            self.reason = 'Edition number {} is already registerd in the blockchain'. format(self.edition_number)
+            self.reason = 'Edition number {} is already registered in the blockchain'. format(self.edition_number)
             return False
 
         return True

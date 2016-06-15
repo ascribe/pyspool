@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import os
 import unittest
 
@@ -185,3 +189,117 @@ def test_can_editions_registered_edition_qty(alice,
     assert not ownership.can_editions
     assert (ownership.reason ==
             'Number of editions was already registered for this piece')
+
+
+def test_can_register_edition(alice, rpcuser, rpcpassword,
+                              host, port, registered_edition_qty_hashes):
+    from spool.ownership import Ownership
+    piece_address = registered_edition_qty_hashes[0]
+    edition_number = 2
+    ownership = Ownership(
+        alice,
+        piece_address,
+        edition_number,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert ownership.can_register
+    assert ownership.reason == ''
+
+
+def test_can_register_edition_for_not_registered_piece(alice,
+                                                       rpcuser,
+                                                       rpcpassword,
+                                                       host,
+                                                       port,
+                                                       piece_hashes):
+    from spool.ownership import Ownership
+    piece_address = piece_hashes[0]
+    edition_number = 2
+    ownership = Ownership(
+        alice,
+        piece_address,
+        edition_number,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_register
+    assert ownership.reason == 'Master edition not yet registered'
+
+
+def test_can_register_edition_for_loan(carol,
+                                       rpcuser,
+                                       rpcpassword,
+                                       host,
+                                       port,
+                                       loaned_piece_hashes):
+    from spool.ownership import Ownership
+    piece_address = loaned_piece_hashes[0]
+    edition_number = 0
+    ownership = Ownership(
+        carol,
+        piece_address,
+        edition_number,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_register
+    assert ownership.reason == 'Number of editions not yet registered'
+
+
+def test_can_register_registered_edition(alice,
+                                         rpcuser,
+                                         rpcpassword,
+                                         host,
+                                         port,
+                                         registered_edition_two_hashes):
+    from spool.ownership import Ownership
+    piece_address = registered_edition_two_hashes[0]
+    edition_number = 2
+    ownership = Ownership(
+        alice,
+        piece_address,
+        edition_number,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_register
+    assert (ownership.reason ==
+            'Edition number 2 is already registered in the blockchain')
+
+
+def test_can_register_edition(alice, rpcuser, rpcpassword,
+                              host, port, registered_edition_qty_hashes):
+    from spool.ownership import Ownership
+    piece_address = registered_edition_qty_hashes[0]
+    edition_number = 4
+    ownership = Ownership(
+        alice,
+        piece_address,
+        edition_number,
+        testnet=True,
+        service='daemon',
+        username=rpcuser,
+        password=rpcpassword,
+        host=host,
+        port=port,
+    )
+    assert not ownership.can_register
+    assert ownership.reason == ('You can only register 3 editions. '
+                                'You are trying to register edition 4')
