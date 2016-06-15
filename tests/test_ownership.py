@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
-import os
 import unittest
+
+import pytest
 
 from spool import Ownership
 
@@ -26,7 +27,7 @@ USER2 -> Loans edition number 1 to USER3
 """
 
 
-@unittest.skipIf(os.environ.get('TRAVIS'), 'sslv3 alert handshake failure')
+@unittest.skip
 class TestOwnership(unittest.TestCase):
 
     def test_ownsership(self):
@@ -90,23 +91,9 @@ def test_ownership_init(alice, registered_piece_hashes,
     assert ownership.reason == ''
 
 
-def test_can_register_master_true(alice, piece_hashes, rpcuser,
-                                  rpcpassword, host, port):
-    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
-    piece_address = piece_hashes[0]
-    ownership = Ownership(
-        alice,
-        piece_address,
-        REGISTERED_PIECE_CODE,
-        testnet=True,
-        service='daemon',
-        username=rpcuser,
-        password=rpcpassword,
-        host=host,
-        port=port,
-    )
-    assert ownership.can_register_master
-    assert ownership.reason == ''
+def test_can_register_master_true(ownership_not_registered_piece):
+    assert ownership_not_registered_piece.can_register_master
+    assert ownership_not_registered_piece.reason == ''
 
 
 def test_can_register_master_false(alice, registered_piece_hashes,
@@ -148,23 +135,10 @@ def test_can_editions(alice, registered_piece_hashes,
     assert ownership.reason == ''
 
 
-def test_can_editions_not_registered_piece(alice, piece_hashes, rpcuser,
-                                           rpcpassword, host, port):
-    from spool.ownership import Ownership, REGISTERED_PIECE_CODE
-    piece_address = piece_hashes[0]
-    ownership = Ownership(
-        alice,
-        piece_address,
-        REGISTERED_PIECE_CODE,
-        testnet=True,
-        service='daemon',
-        username=rpcuser,
-        password=rpcpassword,
-        host=host,
-        port=port,
-    )
-    assert not ownership.can_editions
-    assert ownership.reason == 'Master edition not yet registered'
+def test_can_editions_not_registered_piece(ownership_not_registered_piece):
+    assert not ownership_not_registered_piece.can_editions
+    assert (ownership_not_registered_piece.reason ==
+            'Master edition not yet registered')
 
 
 def test_can_editions_registered_edition_qty(alice,
@@ -259,29 +233,10 @@ def test_can_register_edition_for_loan(carol,
     assert ownership.reason == 'Number of editions not yet registered'
 
 
-def test_can_register_registered_edition(alice,
-                                         rpcuser,
-                                         rpcpassword,
-                                         host,
-                                         port,
-                                         registered_edition_two_hashes):
-    from spool.ownership import Ownership
-    piece_address = registered_edition_two_hashes[0]
-    edition_number = 2
-    ownership = Ownership(
-        alice,
-        piece_address,
-        edition_number,
-        testnet=True,
-        service='daemon',
-        username=rpcuser,
-        password=rpcpassword,
-        host=host,
-        port=port,
-    )
-    assert not ownership.can_register
-    assert (ownership.reason ==
-            'Edition number 2 is already registered in the blockchain')
+def test_can_register_registered_edition(ownership_edition_one):
+    assert not ownership_edition_one.can_register
+    assert (ownership_edition_one.reason ==
+            'Edition number 1 is already registered in the blockchain')
 
 
 def test_can_register_non_existing_edition(alice,
@@ -307,3 +262,44 @@ def test_can_register_non_existing_edition(alice,
     assert not ownership.can_register
     assert ownership.reason == ('You can only register 3 editions. '
                                 'You are trying to register edition 4')
+
+
+@pytest.mark.parametrize('action', ('transfer', 'consign', 'loan'))
+def test_can_spool_action(action, ownership_edition_one):
+    assert getattr(ownership_edition_one, 'can_{}'.format(action))
+    assert ownership_edition_one.reason == ''
+
+
+@pytest.mark.parametrize('action', ('transfer', 'consign', 'loan'))
+def test_can_spool_action_non_existing_edition(action, ownership_edition_qty):
+    assert not getattr(ownership_edition_qty, 'can_{}'.format(action))
+    assert (ownership_edition_qty.reason ==
+            'The edition number {} does not exist in the blockchain'.format(
+                ownership_edition_qty.edition_number))
+
+
+@pytest.mark.parametrize('action', ('transfer', 'consign', 'loan'))
+def test_can_spool_action_squatted_edition(action, squattership_edition_one):
+    assert not getattr(squattership_edition_one, 'can_{}'.format(action))
+    squatter = squattership_edition_one.address
+    assert (squattership_edition_one.reason ==
+            'Address {} does not own the edition number 1'.format(squatter))
+
+
+def test_can_unconsign(ownership_consigned_edition):
+    assert ownership_consigned_edition.can_unconsign
+    assert ownership_consigned_edition.reason == ''
+
+
+def test_can_unconsign_not_registered_piece(ownership_not_registered_piece):
+    assert not ownership_not_registered_piece.can_unconsign
+    assert (ownership_not_registered_piece.reason ==
+            'Master edition not yet registered')
+
+
+def test_can_unconsign_not_consigned(ownership_edition_one):
+    assert not ownership_edition_one.can_unconsign
+    assert (ownership_edition_one.reason ==
+            'Edition number {} is not consigned to {}'.format(
+                ownership_edition_one.edition_number,
+                ownership_edition_one.address))
