@@ -2,7 +2,8 @@
 File related methods
 """
 import hashlib
-import pybitcointools
+
+import bitcoin
 
 
 class File(object):
@@ -52,8 +53,8 @@ class File(object):
             data = str([unicode(value) for value in kwargs.itervalues()] + [file_hash])
         else:
             data = file_hash
-        address_piece_with_metadata = unicode(pybitcointools.bin_to_b58check(pybitcointools.bin_hash160(data),
+        address_piece_with_metadata = unicode(bitcoin.bin_to_b58check(bitcoin.bin_hash160(data),
                                                                              magicbyte=self._magicbyte))
-        address_piece = unicode(pybitcointools.bin_to_b58check(pybitcointools.bin_hash160(file_hash),
+        address_piece = unicode(bitcoin.bin_to_b58check(bitcoin.bin_hash160(file_hash),
                                                                magicbyte=self._magicbyte))
         return address_piece, address_piece_with_metadata
