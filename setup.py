@@ -30,13 +30,12 @@ def find_version(*file_paths):
 
 install_requires = [
     'pybitcointools==1.1.15',
-    'pycoin',
+    'pycoin>=0.70',
     'requests>=2.7.0',
     'transactions>=0.1.0',
 ]
 
 dependency_links = [
-    'git+https://github.com/richardkiss/pycoin@80aeee52e58fed72b136cbf1aec1bbbb8d1e01a8#egg=pycoin',
     'git+https://github.com/sbellem/python-bitcoinrpc.git@setup#egg=python_bitcoinrpc-0.3.1',
 ]
 
@@ -69,8 +68,8 @@ setup(
     version=find_version('spool', '__init__.py'),
     url='https://github.com/ascribe/pyspool',
     license='Apache Software License',
-    author='Rodolphe Marques',
-    author_email='rodolphe@ascribe.io',
+    author='pyspool contributors',
+    author_email='devel@ascribe.io',
     packages=['spool'],
     description='pyspool: Reference implementation of the SPOOL protocol',
     long_description=__doc__,
@@ -79,7 +78,7 @@ setup(
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2 :: Only'
         'Programming Language :: Python :: 2.7',
         'Topic :: Software Development',
     ],

@@ -6,4 +6,4 @@ from file import File   # noqa
 from wallet import Wallet   # noqa
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
