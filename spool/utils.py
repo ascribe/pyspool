@@ -24,7 +24,7 @@ def dispatch(f):
         t = args[0]._t
         from_address = args[1][1]
         to_address = args[2]
-        password = args[4]
+        password = args[4]      # TODO remove, as it is not used
         # a piece has no edition number
         if name not in ['register_piece', 'consigned_registration']:
             edition_number = args[5]
