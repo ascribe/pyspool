@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 import unittest
 
@@ -39,14 +40,14 @@ class TestBlockchainSpider(unittest.TestCase):
 
     def test_decode_op_return(self):
         decoded_op_return = BlockchainSpider.decode_op_return(OP_RETURN_HEX)
-        self.assertEqual(decoded_op_return, 'ASCRIBESPOOL01LOAN1/150522150523')
+        self.assertEqual(decoded_op_return, b'ASCRIBESPOOL01LOAN1/150522150523')
 
     def test_check_scripts(self):
         t = Transactions(testnet=True)
         tx = t.get(TXID)
         vouts = tx['vouts']
         verb = BlockchainSpider.check_script(vouts)
-        self.assertEqual(verb, 'ASCRIBESPOOL01EDITIONS10')
+        self.assertEqual(verb, b'ASCRIBESPOOL01EDITIONS10')
 
     def test_strip_loan(self):
         chain = BlockchainSpider.chain(self.tree, 1)

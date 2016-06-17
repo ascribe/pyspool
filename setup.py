@@ -4,6 +4,7 @@ Ledger `SPOOL <https://github.com/ascribe/spool>`_ and part of the development
 stack of `ascribe.io <https://www.ascribe.io/>`_.
 
 """
+from __future__ import unicode_literals
 import io
 import os
 import re
@@ -30,6 +31,7 @@ def find_version(*file_paths):
 
 install_requires = [
     'bitcoin>=1.1.42',
+    'future>=0.15.2',
     'pycoin>=0.70',
     'requests>=2.10.0',
     'transactions>=0.2.0',

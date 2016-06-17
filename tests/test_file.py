@@ -8,9 +8,8 @@ import pytest
 FILENAME = 'tests/ascribe.png'
 FILE_HASH_TESTNET = 'mv5yDkR5dnjGHxietq7CH78WHk8vzsu4vH'
 FILE_HASH_MAINNET = '1Fa1vhL6pmJ1WrF3BG8pTBvBRkYE6CHorQ'
-FILE_HASH_METADATA_TESTNET = 'mskxntZtYiRHumod1wLFavzKBBGvpCyCNh'
-FILE_HASH_METADATA_MAINNET = '1DF1VqUujgz38fL1JNMsm1mzKBgDoQgXCb'
-METADATA = {'title': 'ascribe', 'artist': 'Rodolphe Marques'}
+FILE_HASH_METADATA_TESTNET = 'mr4yicsC7v3P92YrTf1kQByYWJSmXmoaBS'
+FILE_HASH_METADATA_MAINNET = '1BZ2RZnDJtc8Mv5Ek63NaGmDeJr4ahtexU'
 
 
 @pytest.mark.parametrize('testnet,file_hash', [
@@ -32,8 +31,8 @@ def test_file_metadata(testnet, file_hash_metadata):
     from spool import File
     f = File(FILENAME,
              testnet=testnet,
-             title=METADATA['title'],
-             artist=METADATA['artist'])
+             title='ascribe',
+             artist='Rodolphe Marques')
     assert f.file_hash_metadata == file_hash_metadata
     assert f.file_hash_metadata != f.file_hash
 

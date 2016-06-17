@@ -1,6 +1,10 @@
-from exceptions import Exception
+# -*- coding: utf-8 -*-
 
-from spoolex import BlockchainSpider
+from __future__ import absolute_import, unicode_literals
+
+from builtins import object
+
+from .spoolex import BlockchainSpider
 
 
 REGISTERED_PIECE_CODE = ''

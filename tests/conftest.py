@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division, unicode_literals
+from builtins import range
 
 import os
 from uuid import uuid1

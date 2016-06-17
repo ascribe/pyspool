@@ -1,6 +1,11 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import unittest
-from spool import Wallet
 from datetime import datetime
+
+from spool import Wallet
 
 MASTER_PASSWORD = 'MaStErPaSsWoRd'
 

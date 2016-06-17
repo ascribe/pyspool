@@ -2,3 +2,4 @@ docs/build
 .eggs/
 dist/
 pyspool.egg-info/
+*.bak

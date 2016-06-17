@@ -1,13 +1,18 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
+from builtins import object
+
 import binascii
 import calendar
-
 from collections import namedtuple, defaultdict
-from exceptions import Exception
 from datetime import datetime
 from pprint import PrettyPrinter
 
 from transactions import Transactions
-from spoolverb import Spoolverb
+
+from .spoolverb import Spoolverb
+
 
 SPOOLVERB = namedtuple('SPOOLVERB', ['register', 'consign', 'transfer', 'loan', 'unconsign', 'fuel'])
 spoolverb = SPOOLVERB('ASCRIBESPOOL01REGISTER',
@@ -93,7 +98,7 @@ class BlockchainSpider(object):
 
         # lets update the records with the number of editions of the piece since we do not know
         # this information before the EDITIONS transaction
-        for edition, chain in tree.iteritems():
+        for edition, chain in tree.items():
             [d.update({'number_editions': number_editions}) for d in chain]
         return dict(tree)
 
@@ -141,7 +146,7 @@ class BlockchainSpider(object):
             op_return_hex (str): hex representation of the op_return
 
         Returns:
-            str: tring representation of the op_return
+            str: string representation of the op_return
 
         """
         return binascii.unhexlify(op_return_hex[4:])

@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 Wallet related methods
 """
-from pycoin.key.BIP32Node import BIP32Node
+from __future__ import unicode_literals
+
+from builtins import object, str
 from datetime import datetime
+
+from pycoin.key.BIP32Node import BIP32Node
 
 
 class Wallet(object):
@@ -21,6 +26,8 @@ class Wallet(object):
 
         """
         netcode = 'XTN' if testnet else 'BTC'
+        if isinstance(password, str):
+            password = password.encode()
         self.wallet = BIP32Node.from_master_secret(password, netcode=netcode)
         self.root_address = ('', self.wallet.address())
 

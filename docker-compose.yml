@@ -11,6 +11,17 @@ services:
       BITCOIN_RPCUSER: merlin
       BITCOIN_RPCPASSWORD: secret
     command: py.test --verbose
+  spool-py2:
+    build:
+      context: .
+      dockerfile: Dockerfile-py2
+    volumes:
+      - .:/usr/src/app
+    environment:
+      BITCOIN_HOST: bitcoin
+      BITCOIN_RPCUSER: merlin
+      BITCOIN_RPCPASSWORD: secret
+    command: py.test --verbose
   bitcoin:
     image: ascribe/bitcoin
     volumes:

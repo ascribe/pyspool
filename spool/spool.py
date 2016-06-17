@@ -1,12 +1,19 @@
+# -*- coding: utf-8 -*-
 """
 Main spool verb methods
 """
-from exceptions import Exception
-from Queue import Queue
+from __future__ import absolute_import, division,  unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
+from builtins import object, range
+from past.utils import old_div
+from queue import Queue
 
 from transactions import Transactions
-from utils import dispatch
-from spoolverb import Spoolverb
+
+from .spoolverb import Spoolverb
+from .utils import dispatch
 
 
 class SpoolFundsError(Exception):
@@ -444,7 +451,7 @@ class Spool(object):
         """
         # list of addresses to send
         ntokens = len(to)
-        nfees = self._t.estimate_fee(ntokens, 2) / self.FEE
+        nfees = old_div(self._t.estimate_fee(ntokens, 2), self.FEE)
         inputs = self.select_inputs(from_address, nfees, ntokens, min_confirmations=min_confirmations)
         # outputs
         outputs = [{'address': to_address, 'value': self.TOKEN} for to_address in to]
@@ -456,12 +463,12 @@ class Spool(object):
     def select_inputs(self, address, nfees, ntokens, min_confirmations=6):
         # selects the inputs for the spool transaction
         unspents = self._t.get(address, min_confirmations=min_confirmations)['unspents']
-        unspents = filter(lambda d: d not in self._spents.queue, unspents)
+        unspents = [u for u in unspents if u not in self._spents.queue]
         if len(unspents) == 0:
             raise Exception("No spendable outputs found")
 
-        fees = filter(lambda d: d['amount'] == self.FEE, unspents)[:nfees]
-        tokens = filter(lambda d: d['amount'] == self.TOKEN, unspents)[:ntokens]
+        fees = [u for u in unspents if u['amount'] == self.FEE][:nfees]
+        tokens = [u for u in unspents if u['amount'] == self.TOKEN][:ntokens]
         if len(fees) != nfees or len(tokens) != ntokens:
             raise SpoolFundsError("Not enough outputs to spend. Refill your wallet")
         if self._spents.qsize() > self.SPENTS_QUEUE_MAXSIZE - (nfees + ntokens):

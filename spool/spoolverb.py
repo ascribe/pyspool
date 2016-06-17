@@ -1,4 +1,9 @@
-from exceptions import Exception
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+from builtins import object
+
 import re
 
 
@@ -52,6 +57,10 @@ class Spoolverb(object):
         :return: Spoolverb instance
         """
         pattern = r'^(?P<meta>[A-Z]+)(?P<version>\d+)(?P<action>[A-Z]+)(?P<arg1>\d+)?(\/(?P<arg2>\d+))?$'
+        try:
+            verb = verb.decode()
+        except AttributeError:
+            pass
         match = re.match(pattern, verb)
         if not match:
             raise SpoolverbError('Invalid spoolverb: {}'.format(verb))
