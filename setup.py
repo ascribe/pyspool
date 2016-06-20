@@ -29,6 +29,10 @@ def find_version(*file_paths):
     raise RuntimeError('Unable to find version string.')
 
 
+with io.open('README.rst', encoding='utf-8') as readme:
+    long_description = readme.read()
+
+
 install_requires = [
     'bitcoin>=1.1.42',
     'future>=0.15.2',
@@ -73,7 +77,7 @@ setup(
     author_email='devel@ascribe.io',
     packages=['spool'],
     description='pyspool: Reference implementation of the SPOOL protocol',
-    long_description=__doc__,
+    long_description=long_description,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
