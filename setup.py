@@ -64,7 +64,6 @@ docs_require = [
     'sphinx_rtd_theme',
 ]
 
-
 setup(
     name='pyspool',
     version=find_version('spool', '__init__.py'),
@@ -90,7 +89,7 @@ setup(
     tests_require=tests_require,
     extras_require={
         'test': tests_require,
-        'dev':  dev_require + tests_require + docs_require,
-        'docs':  docs_require,
+        'dev': dev_require + tests_require + docs_require,
+        'docs': docs_require,
     },
 )
