@@ -23,11 +23,10 @@ urepr = ExplicitUnicodeLiteral
 class File(object):
 
     """
-    File utility class.
+    Class used to calculate the hash of a file and the hash of the file +
+    metadata to be included on the blockchain
 
-    Given a file name it calculates the hash of the file and the hash of the file + metadata
     """
-
     def __init__(self, filename, testnet=False, **kwargs):
         """
         Args:
@@ -44,7 +43,7 @@ class File(object):
                 order for the computation of the hash.
 
         Returns:
-            File instance
+            :class:`File` instance
 
         """
         self.testnet = testnet
@@ -55,11 +54,13 @@ class File(object):
     @classmethod
     def from_hash(cls, hash):
         """
+        Args:
+            hash (str): hash of the file
 
-        :param hash: hash of the file
-        :return: File instance
+        Returns:
+            :class:`File` instance
+
         """
-
         cls.hash = hash
         return cls
 
@@ -82,7 +83,6 @@ class File(object):
                 order for the computation of the hash.
 
         """
-        # hash to address
         with open(filename, 'rb') as f:
             file_hash = hashlib.md5(f.read()).hexdigest()
 

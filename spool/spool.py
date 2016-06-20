@@ -19,8 +19,17 @@ from .utils import dispatch
 class SpoolFundsError(Exception):
     """
     To be raised when an address does not have ownership of a hash.
+
+    Attributes:
+        message (str): Message of the exception.
+
     """
     def __init__(self, message):
+        """
+        Args:
+            message (str): Message of the exception.
+
+        """
         self.message = message
 
     def __str__(self):
@@ -62,12 +71,12 @@ class Spool(object):
     def __init__(self, testnet=False, service='blockr', username='', password='', host='', port=''):
         """
         Args:
-            testnet (bool): Whether to use the mainnet or testnet. Defaults to
-                the mainnet (``False``).
+            testnet (bool): Whether to use the mainnet or testnet.
+                Defaults to the mainnet (:const:`False`).
             service (str): Bitcoin communication interface: ``'blockr'``,
                 ``'daemon'``, or ``'regtest'``. ``'blockr'`` refers to the
-                public api, whereas ``'daemon'`` and ``'regtest'`` refer to the
-                jsonrpc inteface. Defaults to ``'blockr'``.
+                public api, whereas ``'daemon'`` and ``'regtest'`` refer
+                to the jsonrpc inteface. Defaults to ``'blockr'``.
             username (str): username for jsonrpc communications
             password (str): password for jsonrpc communications
             hostname (str): hostname of the bitcoin node when using jsonrpc
@@ -461,7 +470,17 @@ class Spool(object):
         return unsigned_tx
 
     def select_inputs(self, address, nfees, ntokens, min_confirmations=6):
-        # selects the inputs for the spool transaction
+        """
+        Selects the inputs for the spool transaction.
+
+        Args:
+            address (str): bitcoin address to select inputs for
+            nfees (int): number of fees
+            ntokens (int): number of tokens
+            min_confirmations (Optional[int]): minimum number of required
+                confirmations; defaults to 6
+
+        """
         unspents = self._t.get(address, min_confirmations=min_confirmations)['unspents']
         unspents = [u for u in unspents if u not in self._spents.queue]
         if len(unspents) == 0:

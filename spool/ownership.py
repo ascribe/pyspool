@@ -14,9 +14,18 @@ class OwnershipError(Exception):
 
     """
     To be raised when an address does not have ownership of a hash
+
+    Attributes:
+        message (str): Message of the exception.
+
     """
 
     def __init__(self, message):
+        """
+        Args:
+            message (str): Message of the exception.
+
+        """
         self.message = message
 
     def __str__(self):
@@ -25,33 +34,42 @@ class OwnershipError(Exception):
 
 class Ownership(object):
     """
-    Checks the actions that an address can make on a piece
+    Checks the actions that an address can make on a piece.
+
+    Attributes:
+        address (str): Bitcoin address to check ownership over
+            :attr:`piece_address`.
+        piece_address (str): Bitcoin address of the piece to check.
+        edition_number (int): The edition number of the piece.
+        testnet (bool): Bitcoin network. :const:`True` for
+            ``testnet`` or :const:`False` for ``mainnet``.
+        reason (str): Message indicating the reason
+            for the failure of an ownership property.
+
     """
 
     def __init__(self, address, piece_address, edition_number, testnet=False,
                  service='blockr', username='', password='', host='', port=''):
         """
         Args:
-            address (str): bitcoin address to check ownership over
-                ``piece_address``
-            piece_address (str): bitcoin address of the piece to check
-            edition_number (int): the edition number of the piece
-            testnet (Optional[boo]l): whether to use the testnet (``True``)
-                or the mainnet (``False``). Defaults to ``False``.
-            service (Optional[str]): name of service to use to connect to the
-                bitcoin network. Possible names are
+            address (str): Bitcoin address to check ownership over
+                ``piece_address``.
+            piece_address (str): Bitcoin address of the piece to check.
+            edition_number (int): The edition number of the piece.
+            testnet (Optional[boo]l): Whether to use the testnet
+                (:const:`True`) or the mainnet (:const:`False`).
+                Defaults to :const:`False`.
+            service (Optional[str]): Name of service to use to connect
+                to the bitcoin network. Possible names are
                 ``('blockr', 'daemon', 'regtest')``. Defaults to ``'blockr'``.
-            username (Optional[str]): username to connect to a bitcoin node
-                via json-rpc based services: ``('daemon', 'regtest')``
-            password (Optional[str]): password to connect to a bitcoin node
-                via json-rpc based services: ``('daemon', 'regtest')``
-            host (Optional[str]): host of the bitcoin node to connect to
-                via json-rpc based services: ``('daemon', 'regtest')``
-            port (Optional[str]): port of the bitcoin node to connect to
-                via json-rpc based services: ``('daemon', 'regtest')``
-
-        Returns:
-            instance of the :class:`Ownership` class
+            username (Optional[str]): Username to connect to a bitcoin node
+                via json-rpc based services: ``('daemon', 'regtest')``.
+            password (Optional[str]): Password to connect to a bitcoin node
+                via json-rpc based services: ``('daemon', 'regtest').``
+            host (Optional[str]): Host of the bitcoin node to connect to
+                via json-rpc based services: ``('daemon', 'regtest')``.
+            port (Optional[str]): Port of the bitcoin node to connect to
+                via json-rpc based services: ``('daemon', 'regtest')``.
 
         """
         self.address = address
@@ -65,6 +83,11 @@ class Ownership(object):
 
     @property
     def can_transfer(self):
+        """
+        bool: :const:`True` if :attr:`address` can transfer the edition
+        :attr:`edition_number` of :attr:`piece_address` else :const:`False`.
+
+        """
         # 1. The address needs to own the edition
         chain = BlockchainSpider.chain(self._tree, self.edition_number)
 
@@ -82,15 +105,31 @@ class Ownership(object):
 
     @property
     def can_consign(self):
+        """
+        bool: :const:`True` if :attr:`address` can consign the edition
+        :attr:`edition_number` of :attr:`piece_address` else :const:`False`.
+
+        """
         return self.can_transfer
 
     @property
     def can_loan(self):
+        """
+        bool: :const:`True` if :attr:`address` can loan the edition
+        :attr:`edition_number` of :attr:`piece_address` else :const:`False`.
+
+        """
         return self.can_transfer
 
     @property
     def can_unconsign(self):
-        # 1. If the last transaction is a consign of the edition to the user
+        """
+        bool: :const:`True` if :attr:`address` can unconsign the edition
+        :attr:`edition_number` of :attr:`piece_address` else :const:`False`.
+
+        If the last transaction is a consignment of the edition to the user.
+
+        """
         chain = BlockchainSpider.chain(self._tree, self.edition_number)
         if len(chain) == 0:
             self.reason = 'Master edition not yet registered'
@@ -110,12 +149,21 @@ class Ownership(object):
 
     @property
     def can_register(self):
-        # 1. The master piece needs to be registered
-        # 2. The number of editions needs to be registered
-        # 3. The edition_number should not have been registered yet
-        # 4. TODO The root address owns the piece
-        #    right now we cannot do this because we only receive the leaf address
-        #    when registering an edition
+        """
+        bool: :const:`True` if :attr:`address` can register the edition
+        :attr:`edition_number` of :attr:`piece_address` else :const:`False`.
+
+        In order to register an edition:
+
+        1. The master piece needs to be registered.
+        2. The number of editions needs to be registered.
+        3. The :attr:`edition_number` should not have been registered yet.
+
+        .. todo:: Also check that the root address owns the piece.
+            Right now we cannot do this because we only receive
+            the leaf address when registering an edition.
+
+        """
         chain = BlockchainSpider.chain(self._tree, REGISTERED_PIECE_CODE)
 
         # edition 0 should only have two transactions: REGISTER and EDITIONS
@@ -141,8 +189,14 @@ class Ownership(object):
 
     @property
     def can_register_master(self):
-        # To register a master edition:
-        # 1. The piece addr cannot exist in the bitcoin network
+        """
+        bool: :const:`True` if :attr:`address` can register the master
+        edition of :attr:`piece_address` else :const:`False`.
+
+        To register a master edition the piece address cannot exist in the
+        bitcoin network.
+
+        """
 
         if self._tree != {}:
             self.reason = 'Master piece already registered in the blockchain'
@@ -152,10 +206,22 @@ class Ownership(object):
 
     @property
     def can_editions(self):
-        # in order to register the number of editions:
-        # 1. There needs to a least one transaction for the piece_address (the registration of the master edition)
-        # 2. a piece with address piece_address needs to be registered with ASCRIBESPOOL01REGISTER0 (master edition)
-        # 3. the number of editions should have not been set yet (no tx with verb ASCRIBESPOOLEDITIONS)
+        """
+        bool: :const:`True` if :attr:`address` can register the number of
+        editions of :attr:`piece_address` else :const:`False`.
+
+        In order to register the number of editions:
+
+        1. There needs to a least one transaction for the :attr:`piece_address`
+        (the registration of the master edition).
+
+        2. A piece with address :attr:`piece_address` needs to be registered
+        with ``'ASCRIBESPOOL01PIECE'`` (master edition).
+
+        3. The number of editions should have not been set yet (no tx with
+        verb ``'ASCRIBESPOOLEDITIONS'``).
+
+        """
         chain = BlockchainSpider.chain(self._tree, REGISTERED_PIECE_CODE)
 
         if len(chain) == 0:

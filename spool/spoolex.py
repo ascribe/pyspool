@@ -28,6 +28,10 @@ class InvalidTransactionError(Exception):
 
     """
     To be raised when a malformed/invalid transaction is found.
+
+    Attributes:
+        message (str): Message of the exception.
+
     """
 
     def __init__(self, message):
@@ -39,15 +43,26 @@ class InvalidTransactionError(Exception):
 
 class BlockchainSpider(object):
     """
-    Spool blockain explorer. Retrieves from the blockchain the chain of ownership of a hash created
-    with the SPOOL protocol
+    Spool blockchain explorer. Retrieves from the blockchain
+    the chain of ownership of a hash created with the
+    `SPOOL <https://github.com/ascribe/spool>`_ protocol.
+
     """
 
     def __init__(self, testnet=False, service='blockr', username='', password='', host='', port=''):
         """
+        Args:
+            testnet (bool): Whether to use the mainnet or testnet.
+                Defaults to the mainnet (:const:`False`).
+            service (str): Bitcoin communication interface: ``'blockr'``,
+                ``'daemon'``, or ``'regtest'``. ``'blockr'`` refers to the
+                public api, whereas ``'daemon'`` and ``'regtest'`` refer
+                to the jsonrpc inteface. Defaults to ``'blockr'``.
+            username (str): username for jsonrpc communications
+            password (str): password for jsonrpc communications
+            hostname (str): hostname of the bitcoin node when using jsonrpc
+            port (str): port number of the bitcoin node when using jsonrpc
 
-        :param testnet: testnet flag. Defaults to False
-        :return: An instance of the BlockainSpider
         """
         self._t = Transactions(service=service, testnet=testnet, username=username,
                                password=password, host=host, port=port)
@@ -61,7 +76,7 @@ class BlockchainSpider(object):
                 :class:`File` class
 
         Returns:
-            ownsership tree of all editions of a piece
+            dict: Ownsership tree of all editions of a piece.
 
         .. note:: For now we only support searching the blockchain by
             the piece hash.
@@ -105,10 +120,16 @@ class BlockchainSpider(object):
     @staticmethod
     def chain(tree, edition_number):
         """
+        Args:
+            tree (dict): Tree history of all editions of a piece.
+            edition_number (int): The edition number to check for.
+                In the case of a piece (master edition), an empty
+                string (``''``) or zero (``0``) can be passed.
 
-        :param tree: Tree history of all editions of a piece
-        :param edition_number: The edition number to check for
-        :return: The chain of ownsership of a particular edition of the piece ordered by time
+        Returns:
+            list: The chain of ownsership of a particular
+            edition of the piece ordered by time.
+
         """
         # return the chain for an edition_number sorted by the timestamp
         return sorted(tree.get(edition_number, []), key=lambda d: d['timestamp_utc'])
@@ -116,11 +137,16 @@ class BlockchainSpider(object):
     @staticmethod
     def strip_loan(chain):
         """
-        Returns the chain without loan. This way we can look at the last transaction
-        to establish ownership
+        Returns the chain without loan. This way we can
+        look at the last transaction to establish ownership.
 
-        :param chain: chain for a particular edition
-        :return: chain with loan transactions striped from the end of the chain
+        Args:
+            chain (list): Chain for a particular edition.
+
+        Returns:
+            list: Chain with loan transactions striped
+            from the end of the chain.
+
         """
         while chain[-1]['action'] == 'LOAN':
             chain.pop()
@@ -130,9 +156,11 @@ class BlockchainSpider(object):
     @staticmethod
     def pprint(tree):
         """
-        Utility function to pretty print the history tree of a piece
-        :param tree: History tree of a piece
-        :return: None
+        Utility function to pretty print the history tree of a piece.
+
+        Args:
+            tree (dict): History tree of a piece.
+
         """
         p = PrettyPrinter(indent=2)
         p.pprint(tree)
@@ -140,13 +168,15 @@ class BlockchainSpider(object):
     @staticmethod
     def decode_op_return(op_return_hex):
         """
-        Decodes the op_return hex representation into a string
+        Decodes the given ``op_return`` hexadecimal
+        string representation into a string (:obj:`str`).
 
         Args:
-            op_return_hex (str): hex representation of the op_return
+            op_return_hex (str): Hexadecimal string
+                representation of the ``op_return``.
 
         Returns:
-            str: string representation of the op_return
+            str: String representation of the ``op_return``.
 
         """
         return binascii.unhexlify(op_return_hex[4:])
@@ -154,14 +184,18 @@ class BlockchainSpider(object):
     @staticmethod
     def check_script(vouts):
         """
-        Looks into the vouts list of a transaction and returns the
-        ``op_return`` if one exists.
+        Looks into the vouts list of a transaction
+        and returns the ``op_return`` if one exists.
 
         Args;
-            vouts (List[dict]): list of outputs of a transaction
+            vouts (list): List of outputs of a transaction.
 
         Returns:
-            str: string representation of the ``op_return``
+            str: String representation of the ``op_return``.
+
+        Raises:
+            Exception: If no ``vout`` having a supported
+                verb (:attr:`supported_actions`) is found.
 
         """
         for vout in [v for v in vouts[::-1] if v['hex'].startswith('6a')]:
@@ -177,14 +211,14 @@ class BlockchainSpider(object):
         Checks for the from, to, and piece address of a SPOOL transaction.
 
         Args:
-            tx (dict): transaction payload, as returned by
-                ``transactions.Transactions.get()``
+            tx (dict): Transaction payload, as returned by
+                :meth:`transactions.Transactions.get()`.
 
-        .. note:: Formats as returned by JSON-RPC API ``decoderawtransaction``
-            have yet to be supported.
+        .. note:: Formats as returned by JSON-RPC API
+            ``decoderawtransaction`` have yet to be supported.
 
         Returns:
-            Tuple([str]): sender, receiver, and piece addresses
+            Tuple([str]): Sender, receiver, and piece addresses.
 
         """
         from_address = set([vin['address'] for vin in tx['vins']])
@@ -207,11 +241,11 @@ class BlockchainSpider(object):
         blockr.io api) into unix timestamp.
 
         Args:
-            time_utc_str (str): string representation of the time, with the
-                format: `'%Y-%m-%dT%H:%M:%S %Z'`
+            time_utc_str (str): String representation of the time, with the
+                format: `'%Y-%m-%dT%H:%M:%S %Z'`.
 
         Returns:
-            int: unix timestamp
+            int: Unix timestamp.
 
         """
         dt = datetime.strptime(time_utc_str, TIME_FORMAT)
