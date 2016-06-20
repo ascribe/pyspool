@@ -1,5 +1,5 @@
-pyspool API Documentation
-=========================
+Library Reference
+=================
 
 .. automodule:: spool
 

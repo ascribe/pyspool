@@ -25,10 +25,11 @@ Contents
 
     overview
     examples
-    api
+    libref
+    tests
     contributing
-    background
     docs
+    background
     license
 
 
