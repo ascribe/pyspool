@@ -46,7 +46,8 @@ class Spool(object):
     The hash is passed to the methods has a tuple (file_hash, file_hash_metadata)
     """
 
-    def __init__(self, testnet=False, service='blockr', username='', password='', host='', port=''):
+    def __init__(self, testnet=False, service='blockr', username='',
+                 password='', host='', port='', fee=None, token=None):
         """
 
         :param testnet:
@@ -58,6 +59,8 @@ class Spool(object):
                                password=password, host=host, port=port)
         # simple cache for spent outputs. Useful so that rapid firing transactions don't use the same outputs
         self._spents = Queue(maxsize=50)
+        self.fee = fee or self.FEE
+        self.token = token or self.TOKEN
 
     @dispatch
     def register_piece(self, from_address, to_address, hash, password, min_confirmations=6, sync=False, ownership=True):
@@ -328,7 +331,7 @@ class Spool(object):
         """
         path, from_address = from_address
         unsigned_tx = self._t.simple_transaction(from_address,
-                                                 [(to_address, self.FEE)] * nfees + [(to_address, self.TOKEN)] * ntokens,
+                                                 [(to_address, self.fee)] * nfees + [(to_address, self.token)] * ntokens,
                                                  min_confirmations=min_confirmations)
 
         signed_tx = self._t.sign_transaction(unsigned_tx, password)
@@ -355,8 +358,8 @@ class Spool(object):
         verb = Spoolverb()
         # nfees + 1: nfees to refill plus one fee for the refill transaction itself
         inputs = self.select_inputs(from_address, nfees + 1, ntokens, min_confirmations=min_confirmations)
-        outputs = [{'address': to_address, 'value': self.TOKEN}] * ntokens
-        outputs += [{'address': to_address, 'value': self.FEE}] * nfees
+        outputs = [{'address': to_address, 'value': self.token}] * ntokens
+        outputs += [{'address': to_address, 'value': self.fee}] * nfees
         outputs += [{'script': self._t._op_return_hex(verb.fuel), 'value': 0}]
         unsigned_tx = self._t.build_transaction(inputs, outputs)
         signed_tx = self._t.sign_transaction(unsigned_tx, password, path=path)
@@ -376,10 +379,10 @@ class Spool(object):
         """
         # list of addresses to send
         ntokens = len(to)
-        nfees = self._t.estimate_fee(ntokens, 2) / self.FEE
+        nfees = self._t.estimate_fee(ntokens, 2) / self.fee
         inputs = self.select_inputs(from_address, nfees, ntokens, min_confirmations=min_confirmations)
         # outputs
-        outputs = [{'address': to_address, 'value': self.TOKEN} for to_address in to]
+        outputs = [{'address': to_address, 'value': self.token} for to_address in to]
         outputs += [{'script': self._t._op_return_hex(op_return), 'value': 0}]
         # build transaction
         unsigned_tx = self._t.build_transaction(inputs, outputs)
@@ -392,8 +395,8 @@ class Spool(object):
         if len(unspents) == 0:
             raise Exception("No spendable outputs found")
 
-        fees = filter(lambda d: d['amount'] == self.FEE, unspents)[:nfees]
-        tokens = filter(lambda d: d['amount'] == self.TOKEN, unspents)[:ntokens]
+        fees = filter(lambda d: d['amount'] == self.fee, unspents)[:nfees]
+        tokens = filter(lambda d: d['amount'] == self.token, unspents)[:ntokens]
         if len(fees) != nfees or len(tokens) != ntokens:
             raise SpoolFundsError("Not enough outputs to spend. Refill your wallet")
         if self._spents.qsize() > 50 - (nfees + ntokens):
