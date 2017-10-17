@@ -61,6 +61,7 @@ class Spool(object):
         self._spents = Queue(maxsize=50)
         self.fee = fee or self.FEE
         self.token = token or self.TOKEN
+        self._t._min_tx_fee = self.fee
 
     @dispatch
     def register_piece(self, from_address, to_address, hash, password, min_confirmations=6, sync=False, ownership=True):
