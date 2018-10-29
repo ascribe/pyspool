@@ -72,7 +72,7 @@ setup(
     name='pyspool',
     version=find_version('spool', '__init__.py'),
     url='https://github.com/ascribe/pyspool',
-    license='Apache Software License',
+    license='Apache2',
     author='pyspool contributors',
     author_email='devel@ascribe.io',
     packages=['spool'],
